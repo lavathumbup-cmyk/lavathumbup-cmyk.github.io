@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="ja" class="h-full bg-slate-50 text-slate-800">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinguaPulse AI - YouTube Video Learning Studio</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- YouTube IFrame Player API -->
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        .transcript-line.active {
+            background-color: #eef2ff;
+            border-left-color: #4f46e5;
+        }
+        .collapsible-content {
+            transition: max-height 0.3s ease-in-out, opacity 0.2s ease-in-out;
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col font-sans bg-slate-50 text-slate-800 selection:bg-indigo-500 selection:text-white">
+
+    <!-- Top Header Navigation -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+        <div class="max-w-[98%] mx-auto px-2 sm:px-4 h-14 flex items-center justify-between gap-2 md:gap-4">
+            <!-- Brand Logo -->
+            <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+                <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-rose-500 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-100">
+                    <i class="fa-brands fa-youtube text-base sm:text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-sm sm:text-base text-slate-900 leading-tight flex items-center gap-1.5">
+                        LinguaPulse <span class="hidden sm:inline-block text-[10px] px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 border border-rose-200 font-bold">YouTube Studio</span>
+                    </h1>
+                </div>
+            </div>
+
+            <!-- Header Embedded YouTube URL Input -->
+            <div class="flex-1 max-w-xl mx-2 flex items-center gap-1.5">
+                <div class="relative flex-1">
+                    <i class="fa-solid fa-link text-slate-400 text-xs absolute left-3 top-1/2 -translate-y-1/2"></i>
+                    <input type="text" id="customVideoUrlInput" placeholder="YouTube動画URLを入力 (例: https://www.youtube.com/watch?v=...)" 
+                           class="w-full text-xs pl-8 pr-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono shadow-inner transition-all">
+                </div>
+                <button onclick="loadCustomVideoFromInput()" class="py-1.5 px-3 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-bold text-xs rounded-xl shadow-sm transition-all shrink-0 flex items-center gap-1">
+                    <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                    <span class="hidden sm:inline">読み込む</span>
+                </button>
+            </div>
+
+            <!-- YouTube Direct Link in Header -->
+            <a id="headerYouTubeDirectBtn" href="#" target="_blank" rel="noopener noreferrer" 
+               class="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold text-xs rounded-xl transition-all flex items-center gap-1.5 shadow-sm shrink-0" title="YouTube公式で動画を開く">
+                <i class="fa-brands fa-youtube text-rose-600 text-sm"></i>
+                <span class="hidden sm:inline">YouTube本家で開く</span>
+            </a>
+
+            <p class="text-xs text-slate-500 hidden xl:block shrink-0">実践英語リスニング＆シャドーイング学習</p>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="flex-1 max-w-[98%] w-full mx-auto px-2 sm:px-4 py-3 grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+
+        <!-- LEFT COLUMN: YouTube Video Player & Preset Selection -->
+        <section class="lg:col-span-6 space-y-4">
+
+            <!-- Video Player Box -->
+            <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-md relative transition-all">
+                
+                <!-- Video Title Bar & Quick Video Controls (Top Position directly above Video Frame) -->
+                <div class="p-3 bg-white border-b border-slate-100 flex flex-wrap items-center justify-between gap-3">
+                    
+                    <!-- Title & Category Badge -->
+                    <div class="flex items-center gap-2 overflow-hidden flex-1 min-w-0">
+                        <span id="videoCategoryBadge" class="text-[11px] font-bold px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200 shrink-0">
+                            ビジネス
+                        </span>
+                        <h2 id="videoTitleText" class="text-xs sm:text-sm font-bold text-slate-900 truncate"></h2>
+                        <span id="playerStateBadge" class="text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200 shrink-0 hidden sm:inline-block">準備中</span>
+                    </div>
+
+                    <!-- Quick Actions: Playback Speed & Player Size Toggle -->
+                    <div class="flex items-center gap-2 shrink-0">
+                        <!-- Playback Speed Bar -->
+                        <div class="flex items-center gap-1 bg-slate-100/90 px-2.5 py-1 rounded-xl border border-slate-200 text-xs">
+                            <i class="fa-solid fa-gauge-high text-indigo-600 text-[11px]"></i>
+                            <span class="text-slate-600 font-medium text-[11px] hidden sm:inline">速度:</span>
+                            <button onclick="changeSpeed(0.75)" class="speed-btn px-1.5 py-0.5 rounded text-slate-600 hover:bg-white font-bold text-[10px] transition-all" data-speed="0.75">0.75x</button>
+                            <button onclick="changeSpeed(0.9)" class="speed-btn px-1.5 py-0.5 rounded bg-indigo-600 text-white font-bold text-[10px] transition-all" data-speed="0.9">0.9x</button>
+                            <button onclick="changeSpeed(1.0)" class="speed-btn px-1.5 py-0.5 rounded text-slate-600 hover:bg-white font-bold text-[10px] transition-all" data-speed="1.0">1.0x</button>
+                            <button onclick="changeSpeed(1.25)" class="speed-btn px-1.5 py-0.5 rounded text-slate-600 hover:bg-white font-bold text-[10px] transition-all" data-speed="1.25">1.25x</button>
+                        </div>
+
+                        <!-- Compact Player Size Toggle Button -->
+                        <button onclick="togglePlayerSize()" id="playerSizeBtn" 
+                                class="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold transition-all flex items-center gap-1">
+                            <i id="playerSizeBtnIcon" class="fa-solid fa-compress"></i>
+                            <span id="playerSizeBtnText" class="hidden sm:inline">小画面</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Responsive YouTube iFrame Embed Container -->
+                <div id="playerAspectWrapper" class="aspect-video w-full bg-black relative max-h-[380px] transition-all duration-300">
+                    <div id="ytPlayer"></div>
+
+                    <!-- エラー153/埋め込み制限発生時の自動案内バナー -->
+                    <div id="ytErrorBanner" class="hidden absolute inset-0 bg-slate-900/95 text-white p-4 sm:p-6 flex flex-col items-center justify-center text-center z-10 gap-2.5">
+                        <div class="w-10 h-10 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-xl shrink-0">
+                            <i class="fa-solid fa-triangle-exclamation animate-pulse"></i>
+                        </div>
+                        <div class="space-y-1">
+                            <h3 class="font-extrabold text-sm sm:text-base text-slate-100">YouTube再生制限 (エラー 153) の理由</h3>
+                            <p class="text-xs text-slate-300 max-w-md leading-relaxed">
+                                このプレビュー表示環境（Null Referer）ではYouTubeサーバーが埋め込みを拒否しています。<br>
+                                <span class="text-amber-300 font-semibold">※ HTMLファイルを保存してブラウザで開くか、Web公開すると通常通り動画再生できます。</span>
+                            </p>
+                        </div>
+                        <div class="bg-slate-800/90 p-2.5 rounded-xl border border-slate-700/80 text-[11px] text-slate-300 text-left space-y-1 max-w-md w-full shadow-inner">
+                            <p class="font-bold text-amber-300 flex items-center gap-1">
+                                <i class="fa-solid fa-circle-info"></i> この画面でのおすすめ学習方法:
+                            </p>
+                            <p>① 下の<b>「小窓で動画を開く」</b>を押して動画を別窓で再生します</p>
+                            <p>② この画面の<b>タイムスタンプ・スクリプト</b>や<b>シャドーイング</b>を見ながら同時に学習できます</p>
+                        </div>
+                        <div class="flex flex-wrap items-center justify-center gap-2 mt-1">
+                            <button onclick="openPopoutPlayer()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white text-xs font-bold rounded-xl shadow-md transition-all flex items-center gap-1.5">
+                                <i class="fa-solid fa-window-restore"></i> 小窓（ポップアップ）で動画を開く
+                            </button>
+                            <a id="bannerYouTubeLink" href="#" target="_blank" rel="noopener noreferrer" 
+                               class="px-4 py-2 bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white text-xs font-bold rounded-xl shadow-md transition-all flex items-center gap-1.5 shrink-0">
+                                <i class="fa-brands fa-youtube text-sm"></i> YouTube公式で開く
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Video Control Panel & Loop Bar (Balanced Full-width Layout) -->
+                <div class="p-3 bg-slate-50/90 border-t border-slate-200/80 space-y-2">
+                    <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
+                        
+                        <!-- Playback Controls -->
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <button onclick="togglePlayPause()" id="playPauseBtn" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-sm transition-all flex items-center gap-1 text-xs">
+                                <i class="fa-solid fa-play"></i> 再生 / 一時停止
+                            </button>
+                            <button onclick="rewindSeconds(5)" class="px-2.5 py-1.5 bg-white hover:bg-slate-100 text-slate-700 font-bold rounded-xl border border-slate-200 transition-all text-xs" title="5秒戻る">
+                                <i class="fa-solid fa-rotate-left"></i> 5秒
+                            </button>
+                            <button onclick="forwardSeconds(5)" class="px-2.5 py-1.5 bg-white hover:bg-slate-100 text-slate-700 font-bold rounded-xl border border-slate-200 transition-all text-xs" title="5秒進む">
+                                <i class="fa-solid fa-rotate-right"></i> 5秒
+                            </button>
+                            
+                            <!-- A-B Loop Panel Toggle Button -->
+                            <button onclick="toggleABPanel()" class="px-2.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold rounded-xl border border-indigo-200 transition-all text-xs flex items-center gap-1" title="A-B区間リピート設定を開く/閉じる">
+                                <i class="fa-solid fa-repeat"></i> A-B設定
+                            </button>
+                        </div>
+
+                        <!-- Subtitle Mode Switcher -->
+                        <div class="flex items-center gap-1 bg-white p-1 rounded-xl border border-slate-200 shadow-sm text-xs">
+                            <button onclick="setSubMode('both')" id="subBtnBoth" class="px-2.5 py-1 rounded-lg bg-indigo-600 text-white font-bold transition-all text-xs">日英</button>
+                            <button onclick="setSubMode('en')" id="subBtnEn" class="px-2.5 py-1 rounded-lg text-slate-600 hover:text-slate-900 font-bold transition-all text-xs">英語</button>
+                            <button onclick="setSubMode('ja')" id="subBtnJa" class="px-2.5 py-1 rounded-lg text-slate-600 hover:text-slate-900 font-bold transition-all text-xs">日本語</button>
+                        </div>
+                    </div>
+
+                    <!-- A-B Section Loop Controls (Collapsible Compact Bar) -->
+                    <div id="abLoopPanel" class="hidden pt-2 border-t border-slate-200/60 flex flex-wrap items-center justify-between gap-2 text-xs">
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-slate-600">A-B反復:</span>
+                            <button onclick="setLoopPointA()" class="px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-700 rounded-lg border border-slate-200 font-semibold text-xs">A: <span id="loopPointAText">未設定</span></button>
+                            <button onclick="setLoopPointB()" class="px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-700 rounded-lg border border-slate-200 font-semibold text-xs">B: <span id="loopPointBText">未設定</span></button>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <button onclick="toggleABLoop()" id="abLoopToggleBtn" class="px-3 py-1 bg-slate-200 text-slate-700 font-bold rounded-lg text-xs">リピートOFF</button>
+                            <button onclick="clearABLoop()" class="px-2 py-1 text-slate-400 hover:text-slate-600 text-xs">リセット</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Video Library Selector -->
+            <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+                <div class="p-4 bg-slate-50/50 border-b border-slate-100 flex items-center justify-between cursor-pointer select-none"
+                     onclick="toggleCollapse('libraryCardBody', 'libraryCardChevron')">
+                    <h3 class="text-xs font-extrabold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-film text-indigo-600"></i> 学べる動画ライブラリ
+                    </h3>
+                    <button class="w-6 h-6 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-slate-500 flex items-center justify-center transition-all">
+                        <i id="libraryCardChevron" class="fa-solid fa-chevron-up text-xs"></i>
+                    </button>
+                </div>
+
+                <div id="libraryCardBody" class="p-4 space-y-2">
+                    <div id="videoPresetList" class="space-y-2">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- RIGHT COLUMN: Integrated Tabbed Study Studio (Side-by-side with Video) -->
+        <aside class="lg:col-span-6 space-y-5">
+
+            <!-- Tabbed Learning Container -->
+            <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col min-h-[520px]">
+                
+                <!-- Tab Navigation Header -->
+                <div class="bg-slate-100/90 p-1.5 border-b border-slate-200 flex items-center gap-1 overflow-x-auto select-none shrink-0">
+                    <button onclick="switchStudyTab('script')" id="tabBtn-script" 
+                            class="study-tab-btn flex-1 min-w-[90px] py-2 px-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 bg-white text-indigo-700 shadow-sm border border-slate-200/60">
+                        <i class="fa-solid fa-list-ol"></i>
+                        <span>スクリプト</span>
+                    </button>
+                    <button onclick="switchStudyTab('shadowing')" id="tabBtn-shadowing" 
+                            class="study-tab-btn flex-1 min-w-[90px] py-2 px-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 text-slate-600 hover:text-slate-900 hover:bg-white/60">
+                        <i class="fa-solid fa-microphone-lines text-rose-500"></i>
+                        <span>シャドーイング</span>
+                    </button>
+                    <button onclick="switchStudyTab('vocab')" id="tabBtn-vocab" 
+                            class="study-tab-btn flex-1 min-w-[90px] py-2 px-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 text-slate-600 hover:text-slate-900 hover:bg-white/60">
+                        <i class="fa-solid fa-book-bookmark text-amber-500"></i>
+                        <span>重要語彙</span>
+                        <span id="vocabCountBadge" class="text-[10px] px-1.5 py-0.2 rounded-full bg-indigo-50 text-indigo-700 font-extrabold border border-indigo-200">0</span>
+                    </button>
+                    <button onclick="switchStudyTab('bookmarks')" id="tabBtn-bookmarks" 
+                            class="study-tab-btn flex-1 min-w-[90px] py-2 px-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 text-slate-600 hover:text-slate-900 hover:bg-white/60">
+                        <i class="fa-solid fa-bookmark text-amber-500"></i>
+                        <span>保存メモ</span>
+                    </button>
+                </div>
+
+                <!-- Tab Content Bodies Container -->
+                <div class="p-4 flex-1 flex flex-col">
+
+                    <!-- TAB 1: Synchronized Interactive Script -->
+                    <div id="tabContent-script" class="study-tab-content space-y-3 flex-1 flex flex-col">
+                        <div class="flex items-center justify-between gap-2 pb-2 border-b border-slate-100">
+                            <div>
+                                <h3 class="font-extrabold text-slate-900 text-xs sm:text-sm flex items-center gap-1.5">
+                                    <i class="fa-solid fa-list-ol text-indigo-600"></i> タイムスタンプ付きスクリプト
+                                </h3>
+                                <p class="text-[11px] text-slate-500">文章をクリックすると動画の該当時間に移動します。</p>
+                            </div>
+                            <button onclick="addBookmarkCurrentTime()" class="px-2.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl font-bold text-xs transition-all flex items-center gap-1 shadow-sm shrink-0">
+                                <i class="fa-solid fa-bookmark text-amber-500"></i> 時間保存
+                            </button>
+                        </div>
+
+                        <!-- Dynamic Script Lines Container -->
+                        <div id="transcriptContainer" class="space-y-2 max-h-[440px] overflow-y-auto pr-1 flex-1">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- TAB 2: Voice Practice / Shadowing Evaluator -->
+                    <div id="tabContent-shadowing" class="study-tab-content hidden space-y-4">
+                        <div class="pb-2 border-b border-slate-100 flex items-center justify-between">
+                            <h3 class="font-extrabold text-slate-900 text-xs sm:text-sm flex items-center gap-1.5">
+                                <i class="fa-solid fa-microphone-lines text-rose-600"></i> リアルタイム発音シャドーイング練習
+                            </h3>
+                            <span id="speechStatus" class="text-[11px] text-slate-500 font-medium">マイク準備完了</span>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
+                            <button id="recordBtn" onclick="toggleSpeechRecognition()" class="sm:col-span-8 py-3 px-4 bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-microphone"></i> リアルタイム音声認識スタート
+                            </button>
+                            <button onclick="clearRecognizedText()" class="sm:col-span-4 px-3 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl border border-slate-200 transition-all">
+                                リセット
+                            </button>
+                        </div>
+
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 min-h-[90px]">
+                            <div class="text-[10px] font-bold text-slate-400 uppercase mb-1">音声聞き取り結果 (English):</div>
+                            <p id="transcriptOutput" class="text-xs sm:text-sm text-slate-700 italic font-mono leading-relaxed">
+                                「リアルタイム音声認識スタート」をクリックし、左のYouTubeの音声をマネして発音してください...
+                            </p>
+                        </div>
+
+                        <div id="accuracyBadge" class="hidden p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-bold flex items-center justify-between">
+                            <span><i class="fa-solid fa-circle-check text-emerald-600 mr-1.5"></i> 動画フレーズとの発音マッチ度:</span>
+                            <span id="accuracyScore" class="bg-emerald-600 text-white px-2.5 py-0.5 rounded-lg font-bold">90% Match</span>
+                        </div>
+                    </div>
+
+                    <!-- TAB 3: Video Key Vocabulary Extraction -->
+                    <div id="tabContent-vocab" class="study-tab-content hidden space-y-3">
+                        <div class="pb-2 border-b border-slate-100">
+                            <h3 class="font-extrabold text-slate-900 text-xs sm:text-sm flex items-center gap-1.5">
+                                <i class="fa-solid fa-book-bookmark text-amber-500"></i> この動画の重要語彙・表現ノート
+                            </h3>
+                            <p class="text-[11px] text-slate-500">動画に出てくる重要単語の発音を聴き、例文で定着させます。</p>
+                        </div>
+
+                        <div id="videoVocabContainer" class="space-y-2.5 max-h-[440px] overflow-y-auto pr-1">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- TAB 4: Timestamp Notes & Bookmarks -->
+                    <div id="tabContent-bookmarks" class="study-tab-content hidden space-y-3">
+                        <div class="pb-2 border-b border-slate-100 flex items-center justify-between">
+                            <h3 class="font-extrabold text-slate-900 text-xs sm:text-sm flex items-center gap-1.5">
+                                <i class="fa-solid fa-bookmark text-indigo-600"></i> 保存したタイムスタンプメモ
+                            </h3>
+                            <button onclick="clearBookmarks()" class="text-[11px] text-slate-400 hover:text-rose-600 font-bold transition-colors">全消去</button>
+                        </div>
+
+                        <div id="bookmarksContainer" class="space-y-2 text-xs max-h-[440px] overflow-y-auto pr-1">
+                            <p class="text-slate-400 text-center py-6 italic">保存されたタイムスタンプメモはまだありません</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </aside>
+    </main>
+
+    <!-- JS Logic -->
+    <script>
+        // YouTube Video Presets with rich timestamped transcripts and curated vocabulary
+        const VIDEO_PRESETS = [
+            {
+                id: 'L_LUpnjgPso',
+                title: '【ビジネス英語】職場での丁寧な依頼と報告の表現',
+                category: 'ビジネス',
+                direct_url: 'https://www.youtube.com/watch?v=L_LUpnjgPso',
+                transcript: [
+                    { time: 0, text_en: "Hello everyone, welcome back to today's English lesson.", text_ja: "みなさんこんにちは、今日の英語レッスンへようこそ。" },
+                    { time: 8, text_en: "Today we will practice natural business requests.", text_ja: "今日は自然なビジネスの依頼表現を練習します。" },
+                    { time: 15, text_en: "I was wondering if you could double-check this for me.", text_ja: "これについて再度確認していただけないでしょうか。" },
+                    { time: 24, text_en: "Notice how this phrase sounds polite and respectful.", text_ja: "このフレーズがいかに丁寧で敬意がこもっているか注目してください。" },
+                    { time: 32, text_en: "Let's review the key metrics before our meeting.", text_ja: "会議の前に主要な指標を確認しておきましょう。" }
+                ],
+                vocabulary: [
+                    { word: "double-check", meaning: "再確認する", grammar_type: "動詞", example: "Please double-check the report before sending." },
+                    { word: "metric", meaning: "指標・基準", grammar_type: "名詞", example: "We reviewed our key performance metrics." },
+                    { word: "polite", meaning: "丁寧な・礼儀正しい", grammar_type: "形容詞", example: "It is essential to remain polite in business." }
+                ]
+            },
+            {
+                id: 'jP3S2x2G3hM',
+                title: '【旅行・ホテル】チェックイン＆レイトチェックアウト',
+                category: '旅行会話',
+                direct_url: 'https://www.youtube.com/watch?v=jP3S2x2G3hM',
+                transcript: [
+                    { time: 0, text_en: "Good afternoon! How can I help you today?", text_ja: "こんにちは！本日はどのようなご用件でしょうか？" },
+                    { time: 7, text_en: "Would it be possible to arrange a late check-out?", text_ja: "レイトチェックアウトを手配していただくことは可能ですか？" },
+                    { time: 16, text_en: "Let me check our room availability for tomorrow.", text_ja: "明日の部屋の空き状況を確認いたします。" },
+                    { time: 25, text_en: "We can extend your stay until 1:00 PM.", text_ja: "午後1時まで滞在を延長することができます。" }
+                ],
+                vocabulary: [
+                    { word: "arrange", meaning: "手配する・調整する", grammar_type: "動詞", example: "I will arrange a shuttle bus for you." },
+                    { word: "availability", meaning: "空き状況", grammar_type: "名詞", example: "Check room availability on the website." },
+                    { word: "extend", meaning: "延長する", grammar_type: "動詞", example: "Can we extend our hotel stay by one day?" }
+                ]
+            },
+            {
+                id: '8S0FDjFBj8o',
+                title: '【IT・エンジニア】コードレビューとパフォーマンス最適化',
+                category: 'IT・技術',
+                direct_url: 'https://www.youtube.com/watch?v=8S0FDjFBj8o',
+                transcript: [
+                    { time: 0, text_en: "Let's streamline this pipeline to optimize execution speed.", text_ja: "実行速度を最適化するために、このパイプラインを効率化しましょう。" },
+                    { time: 10, text_en: "Reducing build times helps developers deploy faster.", text_ja: "ビルド時間を短縮することで、開発者がより速くデプロイできます。" },
+                    { time: 20, text_en: "We should audit our database queries for bottlenecks.", text_ja: "ボトルネックがないかデータベースクエリを点検すべきです。" }
+                ],
+                vocabulary: [
+                    { word: "streamline", meaning: "効率化する・合理化する", grammar_type: "動詞", example: "We streamline the software development workflow." },
+                    { word: "optimize", meaning: "最適化する", grammar_type: "動詞", example: "Optimize video streaming playback speed." },
+                    { word: "execution", meaning: "実行・遂行", grammar_type: "名詞", example: "The task execution finished without error." }
+                ]
+            }
+        ];
+
+        // Global Application State
+        let player = null;
+        let isPlayerReady = false;
+        let currentVideoData = VIDEO_PRESETS[0];
+        let subtitleMode = 'both'; // 'both', 'en', 'ja'
+        let currentPlaybackRate = 0.9;
+        let abLoopActive = false;
+        let loopPointA = null;
+        let loopPointB = null;
+        let timeUpdateInterval = null;
+        let savedBookmarks = [];
+        let speechRecognitionObj = null;
+        let isRecording = false;
+        let isCompactPlayer = false;
+        let currentTab = 'script'; // 'script', 'shadowing', 'vocab', 'bookmarks'
+
+        // Tab Switching Logic for Right Panel
+        function switchStudyTab(tabName) {
+            currentTab = tabName;
+
+            // Hide all tab content panes
+            document.querySelectorAll('.study-tab-content').forEach(el => el.classList.add('hidden'));
+            
+            // Unhighlight all tab buttons
+            document.querySelectorAll('.study-tab-btn').forEach(btn => {
+                btn.className = "study-tab-btn flex-1 min-w-[90px] py-2 px-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 text-slate-600 hover:text-slate-900 hover:bg-white/60";
+            });
+
+            // Activate target tab button and content
+            const targetContent = document.getElementById(`tabContent-${tabName}`);
+            const targetBtn = document.getElementById(`tabBtn-${tabName}`);
+
+            if (targetContent) targetContent.classList.remove('hidden');
+            if (targetBtn) {
+                targetBtn.className = "study-tab-btn flex-1 min-w-[90px] py-2 px-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 bg-white text-indigo-700 shadow-sm border border-slate-200/60";
+            }
+        }
+
+        function onYouTubeIframeAPIReady() {
+            // iframe生成を検知して referrerpolicy="strict-origin-when-cross-origin" を即座に付与
+            const aspectWrapper = document.getElementById('playerAspectWrapper');
+            if (aspectWrapper) {
+                const observer = new MutationObserver((mutations) => {
+                    mutations.forEach((mutation) => {
+                        mutation.addedNodes.forEach((node) => {
+                            if (node.tagName === 'IFRAME') {
+                                node.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
+                            }
+                        });
+                    });
+                });
+                observer.observe(aspectWrapper, { childList: true, subtree: true });
+            }
+
+            // 安全なorigin設定（http/https以外のプロトコルやnull originでのエラー153を回避）
+            let safeOrigin = undefined;
+            try {
+                if (window.location.origin && window.location.origin !== 'null' && 
+                    (window.location.protocol === 'http:' || window.location.protocol === 'https:')) {
+                    safeOrigin = window.location.origin;
+                }
+            } catch (e) {
+                console.warn('Origin resolve error:', e);
+            }
+
+            const playerVarsConfig = {
+                'playsinline': 1,
+                'rel': 0,
+                'modestbranding': 1,
+                'enablejsapi': 1
+            };
+            if (safeOrigin) {
+                playerVarsConfig.origin = safeOrigin;
+            }
+
+            player = new YT.Player('ytPlayer', {
+                height: '100%',
+                width: '100%',
+                videoId: currentVideoData.id,
+                playerVars: playerVarsConfig,
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange,
+                    'onError': onPlayerError
+                }
+            });
+        }
+
+        function onPlayerReady(event) {
+            isPlayerReady = true;
+
+            const iframe = document.getElementById('ytPlayer');
+            if (iframe && iframe.tagName === 'IFRAME') {
+                iframe.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
+            }
+
+            const stateBadge = document.getElementById('playerStateBadge');
+            if (stateBadge) {
+                stateBadge.innerText = '再生準備完了';
+                stateBadge.className = 'text-[10px] font-semibold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0 hidden sm:inline-block';
+            }
+            
+            player.setPlaybackRate(currentPlaybackRate);
+            
+            if (timeUpdateInterval) clearInterval(timeUpdateInterval);
+            timeUpdateInterval = setInterval(updateTranscriptHighlightAndLoop, 300);
+        }
+
+        function onPlayerError(event) {
+            console.warn('YouTube Player Error Code:', event.data);
+            const stateBadge = document.getElementById('playerStateBadge');
+            if (stateBadge) {
+                const errCode = event.data || 153;
+                stateBadge.innerText = '埋め込み再生制限 (エラー ' + errCode + ')';
+                stateBadge.className = 'text-[10px] font-semibold px-2 py-0.5 rounded bg-rose-100 text-rose-700 border border-rose-200 shrink-0 hidden sm:inline-block';
+            }
+
+            const errBanner = document.getElementById('ytErrorBanner');
+            if (errBanner) {
+                errBanner.classList.remove('hidden');
+            }
+        }
+
+        function onPlayerStateChange(event) {
+            const btn = document.getElementById('playPauseBtn');
+            const stateBadge = document.getElementById('playerStateBadge');
+
+            if (event.data === YT.PlayerState.PLAYING) {
+                if (btn) btn.innerHTML = `<i class="fa-solid fa-pause"></i> 一時停止`;
+                if (stateBadge) {
+                    stateBadge.innerText = '再生中';
+                    stateBadge.className = 'text-[10px] font-semibold px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200 shrink-0 hidden sm:inline-block';
+                }
+            } else if (event.data === YT.PlayerState.PAUSED) {
+                if (btn) btn.innerHTML = `<i class="fa-solid fa-play"></i> 再生`;
+                if (stateBadge) {
+                    stateBadge.innerText = '一時停止中';
+                    stateBadge.className = 'text-[10px] font-semibold px-2 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 shrink-0 hidden sm:inline-block';
+                }
+            }
+        }
+
+        // Section Collapsible Toggle Function
+        function toggleCollapse(bodyId, chevronId) {
+            const body = document.getElementById(bodyId);
+            const chevron = document.getElementById(chevronId);
+            if (!body) return;
+
+            if (body.classList.contains('hidden')) {
+                body.classList.remove('hidden');
+                if (chevron) {
+                    chevron.classList.remove('fa-chevron-down');
+                    chevron.classList.add('fa-chevron-up');
+                }
+            } else {
+                body.classList.add('hidden');
+                if (chevron) {
+                    chevron.classList.remove('fa-chevron-up');
+                    chevron.classList.add('fa-chevron-down');
+                }
+            }
+        }
+
+        // Compact Player Toggle Function
+        function togglePlayerSize() {
+            isCompactPlayer = !isCompactPlayer;
+            const wrapper = document.getElementById('playerAspectWrapper');
+            const btnText = document.getElementById('playerSizeBtnText');
+            const btnIcon = document.getElementById('playerSizeBtnIcon');
+
+            if (isCompactPlayer) {
+                wrapper.classList.remove('max-h-[380px]', 'aspect-video');
+                wrapper.classList.add('max-h-[170px]', 'h-[170px]');
+                if (btnText) btnText.innerText = '標準サイズ';
+                if (btnIcon) btnIcon.className = 'fa-solid fa-expand';
+            } else {
+                wrapper.classList.remove('max-h-[170px]', 'h-[170px]');
+                wrapper.classList.add('max-h-[380px]', 'aspect-video');
+                if (btnText) btnText.innerText = '小画面';
+                if (btnIcon) btnIcon.className = 'fa-solid fa-compress';
+            }
+        }
+
+        // Toggle A-B Loop Panel Visibility
+        function toggleABPanel() {
+            const panel = document.getElementById('abLoopPanel');
+            if (panel) {
+                panel.classList.toggle('hidden');
+            }
+        }
+
+        function openPopoutPlayer() {
+            if (!currentVideoData || !currentVideoData.id) return;
+            const popUrl = `https://www.youtube.com/watch?v=${currentVideoData.id}`;
+            window.open(popUrl, 'ytPopoutWindow', 'width=640,height=380,resizable=yes,scrollbars=no');
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            renderPresetList();
+            loadVideoData(VIDEO_PRESETS[0]);
+            setupSpeechRecognition();
+        });
+
+        function renderPresetList() {
+            const container = document.getElementById('videoPresetList');
+            if (!container) return;
+            container.innerHTML = '';
+
+            VIDEO_PRESETS.forEach(item => {
+                const isCurrent = currentVideoData.id === item.id;
+                const card = document.createElement('div');
+                card.className = `p-3 rounded-xl border cursor-pointer transition-all ${
+                    isCurrent 
+                    ? 'bg-indigo-50 border-indigo-500 shadow-sm text-indigo-950' 
+                    : 'bg-white border-slate-200 hover:border-slate-300 text-slate-700 shadow-sm'
+                }`;
+                card.onclick = () => selectVideoPreset(item);
+
+                card.innerHTML = `
+                    <div class="flex items-center justify-between gap-2 mb-1">
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded ${isCurrent ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600 border border-slate-200'}">${item.category}</span>
+                        <span class="text-[10px] text-slate-400 font-mono"><i class="fa-brands fa-youtube text-rose-500"></i> YouTube</span>
+                    </div>
+                    <h4 class="text-xs font-bold line-clamp-2 leading-snug">${item.title}</h4>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function selectVideoPreset(data) {
+            currentVideoData = data;
+            renderPresetList();
+            loadVideoData(data);
+
+            if (isPlayerReady && player) {
+                player.loadVideoById(data.id);
+            }
+        }
+
+        function loadVideoData(data) {
+            currentVideoData = data;
+
+            const titleEl = document.getElementById('videoTitleText');
+            if (titleEl) titleEl.innerText = data.title;
+
+            const badgeEl = document.getElementById('videoCategoryBadge');
+            if (badgeEl) badgeEl.innerText = data.category;
+            
+            const directUrl = data.direct_url || `https://www.youtube.com/watch?v=${data.id}`;
+
+            const openBtn = document.getElementById('openYouTubeDirectBtn');
+            if (openBtn) openBtn.href = directUrl;
+            
+            const headerBtn = document.getElementById('headerYouTubeDirectBtn');
+            if (headerBtn) headerBtn.href = directUrl;
+
+            const bannerLink = document.getElementById('bannerYouTubeLink');
+            if (bannerLink) bannerLink.href = directUrl;
+
+            const errBanner = document.getElementById('ytErrorBanner');
+            if (errBanner) errBanner.classList.add('hidden');
+
+            renderTranscript();
+            renderVocabulary();
+            clearABLoop();
+        }
+
+        function renderTranscript() {
+            const container = document.getElementById('transcriptContainer');
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (!currentVideoData.transcript || currentVideoData.transcript.length === 0) {
+                container.innerHTML = `<p class="text-slate-400 text-xs italic py-4 text-center">この動画にはタイムスタンプ付き字幕が登録されていません</p>`;
+                return;
+            }
+
+            currentVideoData.transcript.forEach((line, index) => {
+                const div = document.createElement('div');
+                div.id = `transcript-line-${index}`;
+                div.className = `transcript-line p-3 rounded-xl border border-slate-200/80 bg-white hover:bg-slate-50 cursor-pointer transition-all border-l-4 border-l-transparent flex items-start gap-3 shadow-sm`;
+                div.onclick = () => jumpToTime(line.time);
+
+                const showEn = subtitleMode === 'both' || subtitleMode === 'en';
+                const showJa = subtitleMode === 'both' || subtitleMode === 'ja';
+
+                div.innerHTML = `
+                    <span class="px-2 py-1 bg-indigo-50 text-indigo-700 font-mono font-bold text-[10px] rounded-md shrink-0 border border-indigo-100">
+                        ${formatTime(line.time)}
+                    </span>
+                    <div class="space-y-1 flex-1">
+                        ${showEn ? `<p class="text-xs font-bold text-slate-900">${line.text_en}</p>` : ''}
+                        ${showJa ? `<p class="text-[11px] font-medium text-slate-500">${line.text_ja}</p>` : ''}
+                    </div>
+                    <button onclick="event.stopPropagation(); speakTTS('${line.text_en.replace(/'/g, "\\'")}')" 
+                            class="text-slate-400 hover:text-indigo-600 text-xs p-1" title="内蔵TTSで発音聴く">
+                        <i class="fa-solid fa-volume-high"></i>
+                    </button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function renderVocabulary() {
+            const container = document.getElementById('videoVocabContainer');
+            const badge = document.getElementById('vocabCountBadge');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const list = currentVideoData.vocabulary || [];
+            badge.innerText = `${list.length}語`;
+
+            if (list.length === 0) {
+                container.innerHTML = `<p class="text-slate-400 text-xs text-center py-2 italic">単語データなし</p>`;
+                return;
+            }
+
+            list.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "p-3 rounded-xl bg-white border border-slate-200/90 shadow-sm space-y-1.5 hover:border-indigo-200 transition-colors";
+                card.innerHTML = `
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-1.5">
+                            <span class="font-extrabold text-indigo-700 text-xs">${item.word}</span>
+                            <button onclick="speakTTS('${item.word.replace(/'/g, "\\'")}')" class="text-slate-400 hover:text-indigo-600 text-[11px]">
+                                <i class="fa-solid fa-volume-high"></i>
+                            </button>
+                        </div>
+                        <span class="text-[10px] text-slate-600 bg-slate-100 px-2 py-0.5 rounded font-medium border border-slate-200">${item.meaning}</span>
+                    </div>
+                    ${item.grammar_type ? `<span class="inline-block text-[9px] font-mono text-purple-700 bg-purple-50 px-1.5 py-0.2 rounded border border-purple-100">${item.grammar_type}</span>` : ''}
+                    ${item.example ? `<p class="text-[11px] text-slate-500 italic bg-slate-50 p-1.5 rounded border border-slate-100">"${item.example}"</p>` : ''}
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function updateTranscriptHighlightAndLoop() {
+            if (!isPlayerReady || !player || !player.getCurrentTime) return;
+
+            const currentTime = player.getCurrentTime();
+
+            if (currentVideoData.transcript) {
+                let activeIndex = -1;
+                for (let i = 0; i < currentVideoData.transcript.length; i++) {
+                    const lineTime = currentVideoData.transcript[i].time;
+                    const nextTime = (i < currentVideoData.transcript.length - 1) ? currentVideoData.transcript[i + 1].time : 999999;
+                    if (currentTime >= lineTime && currentTime < nextTime) {
+                        activeIndex = i;
+                        break;
+                    }
+                }
+
+                currentVideoData.transcript.forEach((_, idx) => {
+                    const el = document.getElementById(`transcript-line-${idx}`);
+                    if (el) {
+                        if (idx === activeIndex) {
+                            el.classList.add('active');
+                        } else {
+                            el.classList.remove('active');
+                        }
+                    }
+                });
+            }
+
+            if (abLoopActive && loopPointA !== null && loopPointB !== null) {
+                if (currentTime >= loopPointB) {
+                    player.seekTo(loopPointA, true);
+                }
+            }
+        }
+
+        function jumpToTime(seconds) {
+            if (isPlayerReady && player) {
+                player.seekTo(seconds, true);
+                player.playVideo();
+            }
+        }
+
+        function togglePlayPause() {
+            if (!isPlayerReady || !player) return;
+            const state = player.getPlayerState();
+            if (state === YT.PlayerState.PLAYING) {
+                player.pauseVideo();
+            } else {
+                player.playVideo();
+            }
+        }
+
+        function rewindSeconds(sec) {
+            if (!isPlayerReady || !player) return;
+            const cur = player.getCurrentTime();
+            player.seekTo(Math.max(0, cur - sec), true);
+        }
+
+        function forwardSeconds(sec) {
+            if (!isPlayerReady || !player) return;
+            const cur = player.getCurrentTime();
+            player.seekTo(cur + sec, true);
+        }
+
+        function changeSpeed(rate) {
+            currentPlaybackRate = rate;
+            if (isPlayerReady && player) {
+                player.setPlaybackRate(rate);
+            }
+            document.querySelectorAll('.speed-btn').forEach(btn => {
+                if (parseFloat(btn.dataset.speed) === rate) {
+                    btn.className = "speed-btn px-2 py-0.5 rounded bg-indigo-600 text-white font-bold transition-all";
+                } else {
+                    btn.className = "speed-btn px-2 py-0.5 rounded text-slate-600 hover:bg-white font-bold transition-all";
+                }
+            });
+        }
+
+        function setSubMode(mode) {
+            subtitleMode = mode;
+            ['Both', 'En', 'Ja'].forEach(m => {
+                const btn = document.getElementById('subBtn' + m);
+                if (m.toLowerCase() === mode) {
+                    btn.className = "px-2.5 py-1 rounded-lg bg-indigo-600 text-white font-bold transition-all";
+                } else {
+                    btn.className = "px-2.5 py-1 rounded-lg text-slate-600 hover:text-slate-900 font-bold transition-all";
+                }
+            });
+            renderTranscript();
+        }
+
+        // A-B Loop Functions
+        function setLoopPointA() {
+            if (!isPlayerReady || !player) return;
+            loopPointA = player.getCurrentTime();
+            document.getElementById('loopPointAText').innerText = formatTime(loopPointA);
+        }
+
+        function setLoopPointB() {
+            if (!isPlayerReady || !player) return;
+            loopPointB = player.getCurrentTime();
+            document.getElementById('loopPointBText').innerText = formatTime(loopPointB);
+        }
+
+        function toggleABLoop() {
+            if (loopPointA === null || loopPointB === null) {
+                alert('先に「開始地点(A)」と「終了地点(B)」の両方を設定してください。');
+                return;
+            }
+            if (loopPointA >= loopPointB) {
+                alert('終了地点(B)は開始地点(A)より後ろの時間に設定してください。');
+                return;
+            }
+
+            abLoopActive = !abLoopActive;
+            const btn = document.getElementById('abLoopToggleBtn');
+            if (abLoopActive) {
+                btn.className = "px-3 py-1 bg-emerald-600 text-white font-bold rounded-lg border border-emerald-500 animate-pulse shadow-sm";
+                btn.innerText = "リピートON";
+                player.seekTo(loopPointA, true);
+            } else {
+                btn.className = "px-3 py-1 bg-slate-200 text-slate-700 font-bold rounded-lg border border-slate-300";
+                btn.innerText = "リピートOFF";
+            }
+        }
+
+        function clearABLoop() {
+            abLoopActive = false;
+            loopPointA = null;
+            loopPointB = null;
+            document.getElementById('loopPointAText').innerText = "未設定";
+            document.getElementById('loopPointBText').innerText = "未設定";
+            const btn = document.getElementById('abLoopToggleBtn');
+            btn.className = "px-3 py-1 bg-slate-200 text-slate-700 font-bold rounded-lg border border-slate-300";
+            btn.innerText = "リピートOFF";
+        }
+
+        function addBookmarkCurrentTime() {
+            if (!isPlayerReady || !player) return;
+            const time = player.getCurrentTime();
+            const timeStr = formatTime(time);
+
+            savedBookmarks.push({
+                time: time,
+                timeStr: timeStr,
+                videoTitle: currentVideoData.title
+            });
+
+            renderBookmarks();
+        }
+
+        function renderBookmarks() {
+            const container = document.getElementById('bookmarksContainer');
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (savedBookmarks.length === 0) {
+                container.innerHTML = `<p class="text-slate-400 text-center py-3 italic">保存されたメモはまだありません</p>`;
+                return;
+            }
+
+            savedBookmarks.forEach((b, idx) => {
+                const item = document.createElement('div');
+                item.className = "p-2.5 rounded-xl bg-white border border-slate-200 flex items-center justify-between gap-2 shadow-sm hover:border-indigo-200 transition-colors";
+                item.innerHTML = `
+                    <button onclick="jumpToTime(${b.time})" class="flex items-center gap-2 text-left hover:text-indigo-600">
+                        <span class="px-2 py-0.5 bg-indigo-50 text-indigo-700 font-mono font-bold rounded text-[10px] border border-indigo-100">${b.timeStr}</span>
+                        <span class="truncate font-semibold text-slate-700 text-xs">${b.videoTitle}</span>
+                    </button>
+                    <button onclick="deleteBookmark(${idx})" class="text-slate-400 hover:text-rose-600 px-1">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function deleteBookmark(index) {
+            savedBookmarks.splice(index, 1);
+            renderBookmarks();
+        }
+
+        function clearBookmarks() {
+            savedBookmarks = [];
+            renderBookmarks();
+        }
+
+        function loadCustomVideoFromInput() {
+            const input = document.getElementById('customVideoUrlInput').value.trim();
+            if (!input) return;
+
+            let videoId = input;
+            if (input.includes('youtube.com/watch?v=')) {
+                videoId = input.split('v=')[1].split('&')[0];
+            } else if (input.includes('youtu.be/')) {
+                videoId = input.split('youtu.be/')[1].split('?')[0];
+            }
+
+            const customData = {
+                id: videoId,
+                title: 'カスタム登録動画 (' + videoId + ')',
+                category: 'カスタム',
+                direct_url: `https://www.youtube.com/watch?v=${videoId}`,
+                transcript: [
+                    { time: 0, text_en: "Custom Video Loaded successfully.", text_ja: "カスタム動画が正常に読み込まれました。" }
+                ],
+                vocabulary: []
+            };
+
+            selectVideoPreset(customData);
+        }
+
+        function speakTTS(text) {
+            if (!('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'en-US';
+            utterance.rate = currentPlaybackRate;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+
+        function setupSpeechRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                document.getElementById('speechStatus').innerText = 'お使いのブラウザは音声認識非対応です';
+                return;
+            }
+
+            speechRecognitionObj = new SpeechRecognition();
+            speechRecognitionObj.continuous = false;
+            speechRecognitionObj.interimResults = true;
+            speechRecognitionObj.lang = 'en-US';
+
+            speechRecognitionObj.onstart = () => {
+                isRecording = true;
+                document.getElementById('speechStatus').innerText = 'マイク音声聞き取り中...';
+                document.getElementById('recordBtn').classList.add('bg-emerald-600', 'animate-pulse');
+                document.getElementById('recordBtn').classList.remove('bg-rose-600');
+            };
+
+            speechRecognitionObj.onresult = (event) => {
+                let transcript = '';
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    transcript += event.results[i][0].transcript;
+                }
+                document.getElementById('transcriptOutput').innerText = transcript;
+                evaluateSpeechMatch(transcript);
+            };
+
+            speechRecognitionObj.onerror = () => {
+                stopRecordingState();
+            };
+
+            speechRecognitionObj.onend = () => {
+                stopRecordingState();
+            };
+        }
+
+        function toggleSpeechRecognition() {
+            if (!speechRecognitionObj) {
+                alert('音声認識機能はChrome等の主要ブラウザでご利用いただけます。');
+                return;
+            }
+            if (isRecording) {
+                speechRecognitionObj.stop();
+            } else {
+                try { speechRecognitionObj.start(); } catch (e) {}
+            }
+        }
+
+        function stopRecordingState() {
+            isRecording = false;
+            document.getElementById('speechStatus').innerText = '準備完了';
+            const btn = document.getElementById('recordBtn');
+            btn.classList.remove('bg-emerald-600', 'animate-pulse');
+            btn.classList.add('bg-rose-600');
+        }
+
+        function clearRecognizedText() {
+            document.getElementById('transcriptOutput').innerText = '「リアルタイム音声認識スタート」をクリックし、YouTubeの音声をマネして発音してください...';
+            document.getElementById('accuracyBadge').classList.add('hidden');
+        }
+
+        function evaluateSpeechMatch(userSpeech) {
+            if (!currentVideoData.transcript || currentVideoData.transcript.length === 0) return;
+            
+            const targetText = currentVideoData.transcript[0].text_en;
+            const cleanTarget = targetText.toLowerCase().replace(/[^a-z0-9 ]/g, '');
+            const cleanUser = userSpeech.toLowerCase().replace(/[^a-z0-9 ]/g, '');
+
+            const targetWords = cleanTarget.split(' ').filter(Boolean);
+            const userWords = cleanUser.split(' ').filter(Boolean);
+
+            if (targetWords.length === 0 || userWords.length === 0) return;
+
+            let matches = 0;
+            targetWords.forEach(word => {
+                if (userWords.includes(word)) matches++;
+            });
+
+            const score = Math.min(Math.round((matches / targetWords.length) * 100), 100);
+            const badge = document.getElementById('accuracyBadge');
+            const scoreEl = document.getElementById('accuracyScore');
+
+            scoreEl.innerText = `${score}% Match`;
+            badge.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
