@@ -1,0 +1,1105 @@
+<!doctype html>
+<html lang="ja" class="h-full bg-slate-50">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>買う？待つ？ — カメラで無駄遣いストッパー</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter & Noto Sans JP -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'Noto Sans JP', 'sans-serif'],
+          },
+        }
+      }
+    }
+  </script>
+  <style>
+    html { scroll-behavior: smooth; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+    @keyframes pulse-border {
+      0%, 100% { border-color: rgba(225, 29, 72, 0.4); }
+      50% { border-color: rgba(225, 29, 72, 1); }
+    }
+    .animate-pulse-border {
+      animation: pulse-border 2s infinite;
+    }
+  </style>
+</head>
+<body class="font-sans text-slate-800 antialiased h-screen flex overflow-hidden bg-slate-900">
+
+  <!-- サイドバー (LINEのトークルーム一覧風) -->
+  <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-64 bg-slate-900 text-slate-300 flex flex-col transform -translate-x-full sm:translate-x-0 transition-transform duration-300 sm:relative border-r border-slate-800">
+    <div class="p-4 font-black text-lg text-white border-b border-slate-800 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <i data-lucide="shield-check" class="w-5 h-5 text-rose-500"></i>
+        <span>ストッパー</span>
+      </div>
+      <button onclick="closeMobileMenu()" class="sm:hidden text-slate-400 hover:text-white">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+
+    <!-- 自分のID表示エリア -->
+    <div class="p-3 bg-slate-950/60 border-b border-slate-800/80">
+      <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center justify-between">
+        <span>あなたの個人ID</span>
+        <span class="text-[9px] text-indigo-400 font-normal">共有用</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <div id="myUserIdDisplay" class="text-xs font-mono text-indigo-300 truncate flex-1 bg-slate-900 px-2 py-1 rounded border border-slate-800">
+          読み込み中...
+        </div>
+        <button onclick="copyMyUserId()" title="IDをコピー" class="p-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded transition-colors text-xs flex items-center gap-1">
+          <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="p-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">トークルーム / グループ</div>
+    <div class="flex-1 overflow-y-auto px-2 space-y-1" id="groupList">
+      <!-- JSでグループ一覧が挿入されます -->
+    </div>
+    <div class="p-4 border-t border-slate-800">
+      <button onclick="openCreateGroupModal()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-white text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2">
+        <i data-lucide="plus" class="w-4 h-4"></i> 新規グループ作成
+      </button>
+    </div>
+  </aside>
+
+  <!-- メインコンテンツエリア -->
+  <main class="flex-1 flex flex-col h-full bg-slate-950 relative overflow-hidden">
+    
+    <!-- 1. ホーム画面（タイムライン＆履歴表示） -->
+    <div id="viewHome" class="flex-1 flex flex-col h-full overflow-hidden bg-slate-900">
+      <!-- ヘッダー -->
+      <header class="h-14 bg-slate-900 border-b border-slate-800 px-4 flex items-center justify-between z-10">
+        <div class="flex items-center gap-3">
+          <button onclick="openMobileMenu()" class="sm:hidden text-slate-300 hover:text-white p-1">
+            <i data-lucide="menu" class="w-6 h-6"></i>
+          </button>
+          <div>
+            <div class="text-xs text-slate-400 font-medium" id="currentGroupNameDisplay">私専用 (ローカル)</div>
+            <h1 class="text-sm font-bold text-white flex items-center gap-1.5">
+              <span>購入・反省タイムライン</span>
+            </h1>
+          </div>
+        </div>
+        <!-- グループメンバー追加ボタン (グループ選択時のみ表示) -->
+        <div id="groupHeaderActions" class="hidden">
+          <button onclick="openAddMemberModal()" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-slate-700 text-xs font-bold rounded-lg flex items-center gap-1 transition-colors">
+            <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
+            <span>IDで招待</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- 履歴・タイムラインリスト -->
+      <div class="flex-1 overflow-y-auto p-4 max-w-2xl mx-auto w-full space-y-4" id="historyTimeline">
+        <!-- JSで動的に描画されます -->
+      </div>
+
+      <!-- 下部フローティング撮影ボタンバー (Setlog風) -->
+      <div class="p-4 bg-slate-900/90 backdrop-blur-md border-t border-slate-800/80 flex justify-center items-center">
+        <button onclick="switchView('camera')" class="px-8 py-3.5 bg-gradient-to-r from-rose-500 to-indigo-600 hover:from-rose-600 hover:to-indigo-700 text-white font-bold text-sm rounded-full shadow-lg shadow-rose-500/20 flex items-center gap-3 transform hover:scale-105 active:scale-95 transition-all">
+          <div class="p-1 bg-white/20 rounded-full">
+            <i data-lucide="camera" class="w-5 h-5"></i>
+          </div>
+          <span>写真を撮って判断 / 記録</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 2. 専用カメラ撮影画面 -->
+    <div id="viewCamera" class="hidden absolute inset-0 bg-black z-30 flex flex-col justify-between">
+      <!-- カメラヘッダー -->
+      <div class="p-4 flex items-center justify-between text-white z-10 bg-gradient-to-b from-black/80 to-transparent">
+        <button onclick="switchView('home')" class="p-2 bg-black/40 backdrop-blur-md rounded-full text-slate-200 hover:text-white">
+          <i data-lucide="arrow-left" class="w-6 h-6"></i>
+        </button>
+        <span class="text-sm font-bold text-slate-200 tracking-wider">商品を撮影</span>
+        <button onclick="toggleCameraFacing()" class="p-2 bg-black/40 backdrop-blur-md rounded-full text-slate-200 hover:text-white">
+          <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- ビューファインダー -->
+      <div class="relative flex-1 flex items-center justify-center overflow-hidden bg-slate-950">
+        <video id="cameraVideo" autoplay playsinline class="w-full h-full object-cover"></video>
+        <canvas id="photoCanvas" class="hidden"></canvas>
+        
+        <!-- ガイド枠 -->
+        <div class="absolute inset-12 border-2 border-white/30 rounded-3xl pointer-events-none flex items-center justify-center animate-pulse-border">
+          <div class="text-xs text-white/70 bg-black/50 px-3 py-1.5 rounded-full backdrop-blur-sm">
+            対象またはレシートを枠内に収めてください
+          </div>
+        </div>
+      </div>
+
+      <!-- カメラシャッターコントロール -->
+      <div class="p-6 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-center justify-around z-10">
+        <label class="p-3 bg-slate-800/80 hover:bg-slate-700 text-white rounded-full cursor-pointer transition-colors">
+          <i data-lucide="image" class="w-6 h-6"></i>
+          <input type="file" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
+        </label>
+
+        <!-- 大きなシャッターボタン -->
+        <button onclick="takePhotoAndProceed()" class="w-20 h-20 bg-white rounded-full p-1.5 shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center justify-center">
+          <div class="w-full h-full border-4 border-slate-900 rounded-full bg-rose-500 flex items-center justify-center">
+            <i data-lucide="camera" class="w-8 h-8 text-white"></i>
+          </div>
+        </button>
+
+        <div class="w-12"></div> <!-- レイアウト用スペーサー -->
+      </div>
+    </div>
+
+    <!-- 3. 入力＆AI判定画面 (撮影完了後に自動移動) -->
+    <div id="viewInput" class="hidden absolute inset-0 bg-slate-900 z-30 flex flex-col overflow-y-auto">
+      <!-- ヘッダー -->
+      <header class="h-14 bg-slate-900 border-b border-slate-800 px-4 flex items-center justify-between sticky top-0 z-20">
+        <button onclick="switchView('camera')" class="text-slate-400 hover:text-white flex items-center gap-1 text-xs font-bold">
+          <i data-lucide="chevron-left" class="w-4 h-4"></i> 撮り直す
+        </button>
+        <span class="text-sm font-bold text-white">詳細入力・AI分析</span>
+        <button onclick="switchView('home')" class="text-slate-400 hover:text-white text-xs font-bold">
+          キャンセル
+        </button>
+      </header>
+
+      <div class="p-4 max-w-lg mx-auto w-full space-y-5 pb-12">
+        <!-- 撮影画像プレビュー＆AIスキャン状態 -->
+        <div class="relative bg-slate-950 rounded-2xl overflow-hidden border border-slate-800 shadow-xl">
+          <img id="previewImage" class="w-full h-56 object-cover" src="" alt="Captured item">
+          <div id="aiScanningBadge" class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm flex flex-col items-center justify-center gap-2 text-white p-4">
+            <div class="w-8 h-8 border-3 border-rose-500 border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-xs font-bold text-rose-400">Gemini AIが画像を解析中...</p>
+            <p class="text-[11px] text-slate-400">商品名、想定価格、カロリー等を自動抽出しています</p>
+          </div>
+        </div>
+
+        <!-- 記録モード選択 (買う前判断 or 買った後の後悔記録) -->
+        <div class="bg-slate-800/80 p-1.5 rounded-xl flex gap-1 border border-slate-700/60">
+          <button id="modeBeforeBtn" onclick="setRecordMode('before')" class="flex-1 py-2 text-xs font-bold rounded-lg transition-all bg-rose-600 text-white shadow">
+            🛒 買う前判断（迷い中）
+          </button>
+          <button id="modeAfterBtn" onclick="setRecordMode('after')" class="flex-1 py-2 text-xs font-bold rounded-lg transition-all text-slate-400 hover:text-white">
+            💸 買った後の後悔・反省
+          </button>
+        </div>
+
+        <!-- AI抽出結果・編集フォーム -->
+        <div class="bg-slate-800/50 p-4 rounded-2xl border border-slate-700/60 space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1">商品名 / 品目</label>
+            <input type="text" id="inputName" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:ring-2 focus:ring-rose-500 focus:outline-none" placeholder="例：高級ポテトチップス">
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-300 mb-1">価格 (円)</label>
+              <input type="number" id="inputPrice" oninput="updateWorkHourEstimate()" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:ring-2 focus:ring-rose-500 focus:outline-none" placeholder="350">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-300 mb-1">カロリー (任意)</label>
+              <input type="text" id="inputCalorie" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:ring-2 focus:ring-rose-500 focus:outline-none" placeholder="420 kcal">
+            </div>
+          </div>
+
+          <div id="workHoursDisplay" class="text-[11px] font-bold text-amber-400"></div>
+
+          <!-- 買う前用の入力項目 -->
+          <div id="fieldsBefore" class="space-y-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-300 mb-1">欲しい理由・言い訳</label>
+              <textarea id="inputReason" rows="2" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:ring-2 focus:ring-rose-500 focus:outline-none resize-none" placeholder="例：小腹が空いたから、新発売だから"></textarea>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-300 mb-1">代替手段 (家にあるもの等)</label>
+              <input type="text" id="inputAlt" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:ring-2 focus:ring-rose-500 focus:outline-none" placeholder="例：家にある麦茶を飲む">
+            </div>
+          </div>
+
+          <!-- 買った後（反省・後悔）用の入力項目 -->
+          <div id="fieldsAfter" class="space-y-3 hidden">
+            <div>
+              <label class="block text-xs font-bold text-slate-300 mb-1">後悔の気持ち・理由</label>
+              <textarea id="inputRegretReason" rows="2" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:ring-2 focus:ring-rose-500 focus:outline-none resize-none" placeholder="例：誘惑に負けて衝動買いしてしまった。ゲーム買うために節約中だったのに..."></textarea>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-300 mb-1">次回の決意・メッセージ</label>
+              <input type="text" id="inputResolution" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:ring-2 focus:ring-rose-500 focus:outline-none" placeholder="例：コンビニにはお腹が空いている時に行かない！">
+            </div>
+          </div>
+        </div>
+
+        <!-- 照合された過去の「反省・過去の宣言」提示エリア -->
+        <div id="pastWarningBox" class="hidden bg-rose-950/50 border border-rose-800/80 p-4 rounded-2xl text-rose-200 text-xs space-y-2">
+          <div class="flex items-center gap-1.5 font-bold text-rose-400">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            <span>過去のあなたからの警告メモ</span>
+          </div>
+          <p id="pastWarningText" class="leading-relaxed bg-black/40 p-2.5 rounded-xl font-medium"></p>
+        </div>
+
+        <!-- 送信・判定実行ボタン -->
+        <button id="submitBtn" onclick="processRecordSubmission()" class="w-full py-3.5 bg-gradient-to-r from-rose-600 to-indigo-600 hover:from-rose-500 hover:to-indigo-500 text-white font-bold text-sm rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
+          <i data-lucide="check-circle" class="w-5 h-5"></i>
+          <span id="submitBtnText">ストッパー診断を実行する</span>
+        </button>
+      </div>
+    </div>
+
+  </main>
+
+  <script type="module">
+    // モード・画面遷移管理
+    let currentView = 'home'; // 'home' | 'camera' | 'input'
+    let recordMode = 'before'; // 'before' (買う前) | 'after' (買っちゃった後悔)
+    let cameraStream = null;
+    let capturedBase64Image = null;
+    let currentFacingMode = 'environment'; // 'environment' (外カメラ) | 'user' (内カメラ)
+
+    // グループ＆データ管理用変数
+    const STORAGE_KEY = 'buy_decision_history_v2';
+    const GROUPS_STORAGE_KEY = 'buy_decision_groups_v1';
+    let localHistoryData = [];
+    let groupHistoryData = [];
+    let userGroups = [];
+    let currentGroupId = "local"; // "local" or group ID
+    let currentGroupName = "私専用 (ローカル)";
+    let currentUser = { uid: 'user_' + Math.random().toString(36).substring(2, 9) };
+    let db = null; // Mock / Optional Firebase DB instance
+    let unsubscribeGroupHistory = null;
+    let groupsCollectionPath = null;
+
+    // 追加用の一時メンバーリスト（ID検索用）
+    let tempGroupMembers = [];
+
+    window.switchView = switchView;
+    window.setRecordMode = setRecordMode;
+    window.takePhotoAndProceed = takePhotoAndProceed;
+    window.handleImageUpload = handleImageUpload;
+    window.processRecordSubmission = processRecordSubmission;
+    window.copyMyUserId = copyMyUserId;
+    window.openCreateGroupModal = openCreateGroupModal;
+    window.closeCreateGroupModal = closeCreateGroupModal;
+    window.executeCreateGroup = executeCreateGroup;
+    window.openMobileMenu = openMobileMenu;
+    window.closeMobileMenu = closeMobileMenu;
+    window.selectGroup = selectGroup;
+    window.updateWorkHourEstimate = updateWorkHourEstimate;
+    window.searchAndAddMember = searchAndAddMember;
+    window.removeTempMember = removeTempMember;
+    window.openAddMemberModal = openAddMemberModal;
+    window.closeAddMemberModal = closeAddMemberModal;
+    window.searchAndAddMemberToCurrentGroup = searchAndAddMemberToCurrentGroup;
+    window.toggleCameraFacing = toggleCameraFacing;
+
+    // ローカル履歴の読み込み
+    function loadLocalHistory() {
+      try {
+        localHistoryData = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+      } catch (e) {
+        localHistoryData = [];
+      }
+    }
+
+    // 認証とグループデータの初期化
+    function initAuthAndData() {
+      // ユーザーIDの表示
+      const userIdDisplay = document.getElementById('myUserIdDisplay');
+      if (userIdDisplay) {
+        userIdDisplay.textContent = currentUser.uid;
+      }
+
+      // ローカル保存されているグループを読み込み
+      try {
+        userGroups = JSON.parse(localStorage.getItem(GROUPS_STORAGE_KEY) || "[]");
+      } catch (e) {
+        userGroups = [];
+      }
+
+      renderSidebar();
+      renderHistory();
+    }
+
+    // サイドバーのグループ一覧描画
+    function renderSidebar() {
+      const groupList = document.getElementById('groupList');
+      if (!groupList) return;
+
+      let html = `
+        <button onclick="selectGroup('local', '私専用 (ローカル)')" class="w-full text-left px-3 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-between ${currentGroupId === 'local' ? 'bg-rose-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}">
+          <div class="flex items-center gap-2 truncate">
+            <i data-lucide="user" class="w-4 h-4 flex-shrink-0"></i>
+            <span class="truncate">私専用 (ローカル)</span>
+          </div>
+        </button>
+      `;
+
+      userGroups.forEach(g => {
+        const isSelected = currentGroupId === g.id;
+        html += `
+          <button onclick="selectGroup('${g.id}', '👥 ${escapeHtml(g.name)}')" class="w-full text-left px-3 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-between ${isSelected ? 'bg-rose-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}">
+            <div class="flex items-center gap-2 truncate">
+              <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i>
+              <span class="truncate">${escapeHtml(g.name)}</span>
+            </div>
+          </button>
+        `;
+      });
+
+      groupList.innerHTML = html;
+      safeCreateIcons();
+    }
+
+    function switchView(viewName) {
+      currentView = viewName;
+      document.getElementById('viewHome').classList.add('hidden');
+      document.getElementById('viewCamera').classList.add('hidden');
+      document.getElementById('viewInput').classList.add('hidden');
+
+      if (viewName === 'home') {
+        stopCamera();
+        document.getElementById('viewHome').classList.remove('hidden');
+        renderHistory();
+      } else if (viewName === 'camera') {
+        document.getElementById('viewCamera').classList.remove('hidden');
+        startCamera();
+      } else if (viewName === 'input') {
+        stopCamera();
+        document.getElementById('viewInput').classList.remove('hidden');
+      }
+      safeCreateIcons();
+    }
+
+    function setRecordMode(mode) {
+      recordMode = mode;
+      const beforeBtn = document.getElementById('modeBeforeBtn');
+      const afterBtn = document.getElementById('modeAfterBtn');
+      const fieldsBefore = document.getElementById('fieldsBefore');
+      const fieldsAfter = document.getElementById('fieldsAfter');
+      const submitBtnText = document.getElementById('submitBtnText');
+
+      if (mode === 'before') {
+        beforeBtn.className = "flex-1 py-2 text-xs font-bold rounded-lg transition-all bg-rose-600 text-white shadow";
+        afterBtn.className = "flex-1 py-2 text-xs font-bold rounded-lg transition-all text-slate-400 hover:text-white";
+        fieldsBefore.classList.remove('hidden');
+        fieldsAfter.classList.add('hidden');
+        submitBtnText.textContent = "ストッパー診断を実行する";
+      } else {
+        afterBtn.className = "flex-1 py-2 text-xs font-bold rounded-lg transition-all bg-amber-600 text-white shadow";
+        beforeBtn.className = "flex-1 py-2 text-xs font-bold rounded-lg transition-all text-slate-400 hover:text-white";
+        fieldsAfter.classList.remove('hidden');
+        fieldsBefore.classList.add('hidden');
+        submitBtnText.textContent = "反省・後悔ログを記録する";
+      }
+    }
+
+    // カメラ起動処理
+    async function startCamera() {
+      try {
+        const video = document.getElementById('cameraVideo');
+        cameraStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: currentFacingMode, width: { ideal: 1280 }, height: { ideal: 720 } },
+          audio: false
+        });
+        video.srcObject = cameraStream;
+      } catch (err) {
+        console.error("Camera error:", err);
+        showToast("カメラを起動できませんでした。ファイル選択をご利用ください。", "warning");
+      }
+    }
+
+    async function toggleCameraFacing() {
+      currentFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment';
+      stopCamera();
+      await startCamera();
+    }
+
+    function stopCamera() {
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(track => track.stop());
+        cameraStream = null;
+      }
+    }
+
+    // 撮影実行 ＆ 入力画面への自動移動
+    function takePhotoAndProceed() {
+      const video = document.getElementById('cameraVideo');
+      const canvas = document.getElementById('photoCanvas');
+      if (!video.videoWidth) {
+        showToast("カメラ準備中です", "warning");
+        return;
+      }
+
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0);
+
+      capturedBase64Image = canvas.toDataURL('image/jpeg', 0.85);
+      
+      // 入力画面の画像プレビュー設定
+      document.getElementById('previewImage').src = capturedBase64Image;
+
+      // 前回の入力値をクリア
+      resetInputFields();
+
+      // 入力画面へ遷移
+      switchView('input');
+
+      // AI解析を開始（エラーが起きてもアプリをクラッシュさせない）
+      analyzeImageWithGemini(capturedBase64Image).catch(e => console.log("AI解析の中断を安全にキャッチしました:", e.message));
+      checkPastRegrets();
+    }
+
+    function handleImageUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        capturedBase64Image = event.target.result;
+        document.getElementById('previewImage').src = capturedBase64Image;
+
+        // 前回の入力値をクリア
+        resetInputFields();
+
+        switchView('input');
+        // AI解析を開始（エラーが起きてもアプリをクラッシュさせない）
+        analyzeImageWithGemini(capturedBase64Image).catch(e => console.log("AI解析の中断を安全にキャッチしました:", e.message));
+        checkPastRegrets();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // フォーム入力項目をクリアする関数
+    function resetInputFields() {
+      const fields = [
+        'inputName',
+        'inputPrice',
+        'inputCalorie',
+        'inputReason',
+        'inputAlt',
+        'inputRegretReason',
+        'inputResolution'
+      ];
+      fields.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+      const workHours = document.getElementById('workHoursDisplay');
+      if (workHours) workHours.textContent = '';
+    }
+
+    // Gemini APIによる画像解析＆Google Search Grounding（Web検索による商品名・正確な価格特定）
+    async function analyzeImageWithGemini(base64Data) {
+      const badge = document.getElementById('aiScanningBadge');
+      if (badge) {
+        badge.innerHTML = `
+          <div class="w-8 h-8 border-3 border-rose-500 border-t-transparent rounded-full animate-spin"></div>
+          <p class="text-xs font-bold text-rose-400">商品を特定中...</p>
+          <p class="text-[11px] text-slate-400">画像とWeb検索から情報を抽出しています</p>
+        `;
+        badge.classList.remove('hidden');
+      }
+
+      try {
+        const apiKey = ""; 
+        
+        // 正確なMIMEタイプを抽出（PNGやWEBPのアップロードエラー対策）
+        const mimeType = base64Data.substring(base64Data.indexOf(':') + 1, base64Data.indexOf(';')) || 'image/jpeg';
+        const base64Pure = base64Data.split(',')[1];
+
+        // 1回のリクエストで画像解析とGoogle検索を同時に行わせる強力なプロンプト
+        const prompt = `この画像に写っている商品のパッケージの文字や外観から、具体的な商品名やブランドを特定してください。
+その後、Google検索を使用して、この商品の「正確な商品名」「日本の一般的な実売価格（円）」「カロリー（分かれば）」を調べてください。
+
+必ず以下のJSONフォーマットのみを出力してください（Markdown記号や説明文は一切不要です）:
+{"name": "商品名", "price": 価格の数値のみ, "calorie": "カロリー表記（不明なら空文字）"}`;
+
+        const modelUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+        const res = await fetch(modelUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{
+              role: "user",
+              parts: [
+                { text: prompt },
+                { inlineData: { mimeType: mimeType, data: base64Pure } }
+              ]
+            }],
+            tools: [{ "google_search": {} }]
+          })
+        });
+
+        if (!res.ok) {
+           throw new Error("通信エラー: " + res.status);
+        }
+
+        const result = await res.json();
+        const candidate = result?.candidates?.[0];
+
+        let responseText = "";
+        if (candidate?.content?.parts) {
+          for (const part of candidate.content.parts) {
+            if (part.text) responseText += part.text + "\n";
+          }
+        }
+
+        if (responseText) {
+          const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            const parsed = JSON.parse(jsonMatch[0]);
+            
+            // UI更新
+            if (parsed.name && parsed.name !== "商品名") document.getElementById('inputName').value = parsed.name;
+            if (parsed.price && !isNaN(parsed.price) && parsed.price > 0) {
+              document.getElementById('inputPrice').value = parsed.price;
+              updateWorkHourEstimate();
+            }
+            if (parsed.calorie) document.getElementById('inputCalorie').value = parsed.calorie;
+            
+            showToast("商品情報を自動入力しました！", "info");
+          } else {
+            // 代替案: JSONが壊れていても、取得できたテキストの一部を名前に設定して完全な失敗を防ぐ
+            document.getElementById('inputName').value = responseText.replace(/\n/g, ' ').substring(0, 30).trim();
+            showToast("一部の情報を読み取りました。", "info");
+          }
+        } else {
+           throw new Error("レスポンスが空です");
+        }
+      } catch (err) {
+        console.log("AIスキャンエラー:", err.message || err);
+        showToast("読み取りに失敗しました。お手数ですが手動で入力してください。", "warning");
+      } finally {
+        if (badge) badge.classList.add('hidden');
+      }
+    }
+
+    // 過去の自分の反省や決意を検索して提示
+    function checkPastRegrets() {
+      const history = getActiveHistory();
+      const regrets = history.filter(h => h.mode === 'after' || h.regretReason || h.resolution);
+      const pastBox = document.getElementById('pastWarningBox');
+      const pastText = document.getElementById('pastWarningText');
+
+      if (regrets.length > 0) {
+        const latestRegret = regrets[0]; // 直近の反省
+        pastText.textContent = `前回（${latestRegret.name || '前回の買い物'}）のあなたの決意：「${latestRegret.resolution || latestRegret.regretReason}」`;
+        pastBox.classList.remove('hidden');
+      } else {
+        pastBox.classList.add('hidden');
+      }
+    }
+
+    // 記録または診断の実行処理
+    async function processRecordSubmission() {
+      const name = document.getElementById('inputName').value.trim() || '未設定の商品';
+      const price = Number(document.getElementById('inputPrice').value || 0);
+      const calorie = document.getElementById('inputCalorie').value.trim();
+
+      if (recordMode === 'before') {
+        const reason = document.getElementById('inputReason').value.trim();
+        const alt = document.getElementById('inputAlt').value.trim();
+
+        const record = {
+          mode: 'before',
+          name, price, calorie, reason, alt,
+          image: capturedBase64Image
+        };
+
+        await saveNewHistoryItem(record);
+        showToast("判断を記録しました！冷静に考えましょう。");
+        switchView('home');
+      } else {
+        const regretReason = document.getElementById('inputRegretReason').value.trim();
+        const resolution = document.getElementById('inputResolution').value.trim();
+
+        const record = {
+          mode: 'after',
+          name, price, calorie, regretReason, resolution,
+          image: capturedBase64Image
+        };
+
+        await saveNewHistoryItem(record);
+        showToast("後悔・反省メモを記録しました！次回の判断材料にします。");
+        switchView('home');
+      }
+    }
+
+    // 自分のIDをコピー
+    function copyMyUserId() {
+      if (!currentUser) return;
+      
+      const tempInput = document.createElement("input");
+      tempInput.value = currentUser.uid;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      document.execCommand("copy");
+      document.body.removeChild(tempInput);
+      
+      showToast("個人IDをコピーしました！相手に伝えてグループに追加してもらってください。");
+    }
+
+    // 個人IDでメンバーを検索＆検証して追加（グループ作成時）
+    function searchAndAddMember() {
+      const input = document.getElementById('searchUserIdInput');
+      const searchId = input ? input.value.trim() : '';
+
+      if (!searchId) {
+        showToast("検索する個人IDを入力してください", "warning");
+        return;
+      }
+
+      if (searchId === currentUser.uid) {
+        showToast("自分のIDは自動的に追加されます", "warning");
+        input.value = '';
+        return;
+      }
+
+      if (tempGroupMembers.includes(searchId)) {
+        showToast("既にリストに追加されています", "warning");
+        return;
+      }
+
+      // ID形式簡易検証
+      if (searchId.length < 5) {
+        showToast("正しい個人IDを入力してください", "warning");
+        return;
+      }
+
+      tempGroupMembers.push(searchId);
+      input.value = '';
+      renderTempMemberList();
+      showToast(`ID「${searchId}」をメンバー候補に追加しました！`);
+    }
+
+    function removeTempMember(id) {
+      tempGroupMembers = tempGroupMembers.filter(m => m !== id);
+      renderTempMemberList();
+    }
+
+    function renderTempMemberList() {
+      const container = document.getElementById('tempMembersList');
+      if (!container) return;
+
+      if (tempGroupMembers.length === 0) {
+        container.innerHTML = `<span class="text-slate-500 italic">追加されたIDメンバーはいません</span>`;
+        return;
+      }
+
+      container.innerHTML = tempGroupMembers.map(id => `
+        <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-indigo-950 border border-indigo-800 text-indigo-300 rounded-lg text-xs font-mono">
+          <i data-lucide="user" class="w-3 h-3"></i>
+          <span>${id}</span>
+          <button onclick="removeTempMember('${id}')" class="text-indigo-400 hover:text-rose-400 ml-1">
+            <i data-lucide="x" class="w-3 h-3"></i>
+          </button>
+        </span>
+      `).join('');
+
+      safeCreateIcons();
+    }
+
+    // 新規グループ作成モーダルの表示・非表示
+    function openCreateGroupModal() {
+      document.getElementById('newGroupNameInput').value = '';
+      if (document.getElementById('searchUserIdInput')) {
+        document.getElementById('searchUserIdInput').value = '';
+      }
+      tempGroupMembers = [];
+      renderTempMemberList();
+      
+      const modal = document.getElementById('createGroupModal');
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+    }
+
+    function closeCreateGroupModal() {
+      const modal = document.getElementById('createGroupModal');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+    }
+
+    // 既存グループにメンバーをID検索で直接追加するモーダル
+    function openAddMemberModal() {
+      if (currentGroupId === 'local') return;
+      document.getElementById('existingGroupSearchInput').value = '';
+      const modal = document.getElementById('addMemberModal');
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+    }
+
+    function closeAddMemberModal() {
+      const modal = document.getElementById('addMemberModal');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+    }
+
+    function searchAndAddMemberToCurrentGroup() {
+      const input = document.getElementById('existingGroupSearchInput');
+      const searchId = input ? input.value.trim() : '';
+
+      if (!searchId) {
+        showToast("検索する個人IDを入力してください", "warning");
+        return;
+      }
+
+      const groupIndex = userGroups.findIndex(g => g.id === currentGroupId);
+      if (groupIndex === -1) return;
+
+      if (!userGroups[groupIndex].members) {
+        userGroups[groupIndex].members = [currentUser.uid];
+      }
+
+      if (userGroups[groupIndex].members.includes(searchId)) {
+        showToast("このユーザーは既にグループに参加しています", "warning");
+        return;
+      }
+
+      userGroups[groupIndex].members.push(searchId);
+      localStorage.setItem(GROUPS_STORAGE_KEY, JSON.stringify(userGroups));
+
+      closeAddMemberModal();
+      showToast(`個人ID「${searchId}」をグループに追加・共有しました！`);
+      renderSidebar();
+    }
+
+    // グループ作成処理の実行
+    async function executeCreateGroup() {
+      const nameInput = document.getElementById('newGroupNameInput').value.trim();
+
+      if (!nameInput) {
+        showToast("グループ名を入力してください", "warning");
+        return;
+      }
+
+      const newGroup = {
+        id: 'group_' + Date.now(),
+        name: nameInput,
+        createdAt: Date.now(),
+        createdBy: currentUser.uid,
+        members: [currentUser.uid, ...tempGroupMembers]
+      };
+
+      userGroups.push(newGroup);
+      localStorage.setItem(GROUPS_STORAGE_KEY, JSON.stringify(userGroups));
+
+      closeCreateGroupModal();
+      showToast(`グループ「${nameInput}」を作成しました！`);
+      
+      renderSidebar();
+      selectGroup(newGroup.id, `👥 ${nameInput}`);
+    }
+
+    // 選択されたグループの履歴データをリアルタイム購読する関数
+    function subscribeToGroupHistory(groupId) {
+      const headerActions = document.getElementById('groupHeaderActions');
+      if (groupId === "local") {
+        if (headerActions) headerActions.classList.add('hidden');
+        groupHistoryData = [];
+        renderHistory();
+        return;
+      }
+
+      if (headerActions) headerActions.classList.remove('hidden');
+
+      // グループ切り替え時のデータ取得
+      const groupDataKey = `buy_decision_group_data_${groupId}`;
+      try {
+        groupHistoryData = JSON.parse(localStorage.getItem(groupDataKey) || "[]");
+      } catch (e) {
+        groupHistoryData = [];
+      }
+      renderHistory();
+    }
+
+    // スマホ用メニュー開閉
+    function openMobileMenu() {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.remove('-translate-x-full');
+    }
+
+    function closeMobileMenu() {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.add('-translate-x-full');
+    }
+
+    // グループの切り替え
+    function selectGroup(id, name) {
+      currentGroupId = id;
+      currentGroupName = name;
+      
+      const currentGroupNameDisplay = document.getElementById('currentGroupNameDisplay');
+      if (currentGroupNameDisplay) {
+        currentGroupNameDisplay.textContent = name;
+      }
+      
+      renderSidebar();
+      subscribeToGroupHistory(id);
+      closeMobileMenu();
+      showToast(`${name} に切り替えました`);
+    }
+
+    function getActiveHistory() {
+      if (currentGroupId === "local") {
+        return localHistoryData;
+      } else {
+        return groupHistoryData;
+      }
+    }
+
+    function safeCreateIcons() {
+      if (typeof lucide !== 'undefined' && typeof lucide.createIcons === 'function') {
+        lucide.createIcons();
+      }
+    }
+
+    // 初期化
+    window.addEventListener("DOMContentLoaded", () => {
+      loadLocalHistory();
+      initAuthAndData();
+      safeCreateIcons();
+    });
+
+    function updateWorkHourEstimate() {
+      // 労働時間換算メーターの更新
+      const hourly = 1100; // 時給換算基準
+      const price = Number(document.getElementById('inputPrice')?.value || 0);
+      const display = document.getElementById('workHoursDisplay');
+      if (display) {
+        if (hourly > 0 && price > 0) {
+          const hours = (price / hourly).toFixed(1);
+          display.textContent = `💡 あなたの労働（時給1,100円計算）で約 ${hours} 時間分相当！`;
+        } else {
+          display.textContent = '';
+        }
+      }
+    }
+
+    async function saveNewHistoryItem(item) {
+      item.createdAt = Date.now();
+      
+      if (currentGroupId === "local") {
+        item.id = String(Date.now() + Math.random());
+        item.groupId = "local";
+        localHistoryData.unshift(item); // 先頭に追加
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(localHistoryData));
+        renderHistory();
+      } else {
+        item.id = String(Date.now() + Math.random());
+        item.userId = currentUser.uid;
+        item.groupId = currentGroupId;
+        groupHistoryData.unshift(item);
+        
+        const groupDataKey = `buy_decision_group_data_${currentGroupId}`;
+        localStorage.setItem(groupDataKey, JSON.stringify(groupHistoryData));
+        renderHistory();
+      }
+    }
+
+    function formatYen(num) { return Number(num || 0).toLocaleString("ja-JP") + "円"; }
+
+    async function deleteSingleHistory(id) {
+      if (currentGroupId === "local") {
+        localHistoryData = localHistoryData.filter(h => h.id !== id);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(localHistoryData));
+        renderHistory();
+        showToast("履歴を削除しました");
+      } else {
+        groupHistoryData = groupHistoryData.filter(h => h.id !== id);
+        const groupDataKey = `buy_decision_group_data_${currentGroupId}`;
+        localStorage.setItem(groupDataKey, JSON.stringify(groupHistoryData));
+        renderHistory();
+        showToast("グループ履歴から削除しました");
+      }
+    }
+
+    window.deleteSingleHistory = deleteSingleHistory;
+
+    // タイムライン履歴の描画
+    function renderHistory() {
+      const container = document.getElementById('historyTimeline');
+      if (!container) return;
+
+      const history = getActiveHistory();
+
+      if (!history || history.length === 0) {
+        container.innerHTML = `
+          <div class="p-8 text-center bg-slate-800/40 border border-slate-800 rounded-3xl space-y-3">
+            <div class="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center mx-auto text-slate-500">
+              <i data-lucide="camera-off" class="w-6 h-6"></i>
+            </div>
+            <p class="text-xs text-slate-400 font-bold">まだ記録や写真がありません</p>
+            <p class="text-[11px] text-slate-500">「写真を撮って判断 / 記録」ボタンから、商品の写真を撮って買い物の判断や反省メモを残しましょう！</p>
+          </div>`;
+        safeCreateIcons();
+        return;
+      }
+
+      container.innerHTML = history.map(item => {
+        const isRegret = item.mode === 'after';
+        const dateStr = item.createdAt ? new Date(item.createdAt).toLocaleString('ja-JP', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+
+        return `
+          <div class="bg-slate-800/70 border ${isRegret ? 'border-amber-800/60' : 'border-slate-700/60'} rounded-2xl overflow-hidden shadow-lg transition-all space-y-3 p-4">
+            <div class="flex items-center justify-between">
+              <span class="px-2.5 py-1 text-[10px] font-bold rounded-full ${isRegret ? 'bg-amber-950 text-amber-400 border border-amber-800' : 'bg-rose-950 text-rose-400 border border-rose-800'}">
+                ${isRegret ? '💸 買った後の後悔・反省' : '🛒 買う前判断'}
+              </span>
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] text-slate-400">${dateStr}</span>
+                <button onclick="deleteSingleHistory('${item.id}')" class="text-slate-500 hover:text-rose-400 p-1">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="flex gap-3">
+              ${item.image ? `<img src="${item.image}" class="w-20 h-20 object-cover rounded-xl border border-slate-700 bg-black flex-shrink-0" />` : ''}
+              <div class="flex-1 min-w-0 space-y-1">
+                <h3 class="text-sm font-bold text-white truncate">${escapeHtml(item.name || '商品')}</h3>
+                <div class="flex items-center gap-2 text-xs font-bold text-amber-400">
+                  <span>${formatYen(item.price)}</span>
+                  ${item.calorie ? `<span class="text-[10px] bg-slate-700 text-slate-300 px-1.5 py-0.5 rounded">${escapeHtml(item.calorie)}</span>` : ''}
+                </div>
+                ${item.reason ? `<p class="text-xs text-slate-300 bg-slate-900/60 p-2 rounded-lg">💬 理由：${escapeHtml(item.reason)}</p>` : ''}
+                ${item.regretReason ? `<p class="text-xs text-amber-200 bg-amber-950/40 p-2 rounded-lg border border-amber-900/40">😭 反省：${escapeHtml(item.regretReason)}</p>` : ''}
+                ${item.resolution ? `<p class="text-xs text-rose-300 font-bold bg-rose-950/40 p-2 rounded-lg border border-rose-900/40">🔥 決意：${escapeHtml(item.resolution)}</p>` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      safeCreateIcons();
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+  </script>
+
+  <!-- カスタムダイアログ・トースト表示用コンテナ -->
+  <div id="toastContainer" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- 新規グループ作成モーダル -->
+  <div id="createGroupModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-sm w-full p-5 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+          <i data-lucide="users" class="w-4 h-4 text-rose-500"></i>
+          <span>新しいグループ作成</span>
+        </h3>
+        <button onclick="closeCreateGroupModal()" class="text-slate-400 hover:text-white p-1">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-300 font-bold mb-1">グループ名</label>
+          <input type="text" id="newGroupNameInput" placeholder="例：我が家の無駄遣い防止部" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-rose-500">
+        </div>
+
+        <div>
+          <label class="block text-slate-300 font-bold mb-1">個人IDでメンバーを探して追加</label>
+          <div class="flex gap-2">
+            <input type="text" id="searchUserIdInput" placeholder="相手の個人IDを入力" class="flex-1 px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-rose-500 font-mono text-xs">
+            <button onclick="searchAndAddMember()" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-colors flex items-center gap-1">
+              <i data-lucide="search" class="w-3.5 h-3.5"></i>
+              <span>追加</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 追加候補メンバーリスト -->
+        <div>
+          <label class="block text-[11px] text-slate-400 font-bold mb-1">追加予定メンバーリスト:</label>
+          <div id="tempMembersList" class="flex flex-wrap gap-1.5 p-2 bg-slate-950 rounded-xl border border-slate-800/80 min-h-[40px] items-center">
+            <span class="text-slate-500 italic">追加されたIDメンバーはいません</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex gap-2 pt-2">
+        <button onclick="closeCreateGroupModal()" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl transition-colors">
+          キャンセル
+        </button>
+        <button onclick="executeCreateGroup()" class="flex-1 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-xl transition-colors shadow-lg">
+          作成して共有
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 既存グループへ個人IDメンバー追加モーダル -->
+  <div id="addMemberModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-sm w-full p-5 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+          <i data-lucide="user-plus" class="w-4 h-4 text-indigo-400"></i>
+          <span>メンバーをIDで招待・追加</span>
+        </h3>
+        <button onclick="closeAddMemberModal()" class="text-slate-400 hover:text-white p-1">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-300 font-bold mb-1">追加したい人の個人ID</label>
+          <input type="text" id="existingGroupSearchInput" placeholder="例：user_x82a9bc" class="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white font-mono focus:outline-none focus:border-indigo-500">
+          <p class="text-[10px] text-slate-500 mt-1">※相手の画面に表示されている個人IDを入力してください。</p>
+        </div>
+      </div>
+
+      <div class="flex gap-2 pt-2">
+        <button onclick="closeAddMemberModal()" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl transition-colors">
+          キャンセル
+        </button>
+        <button onclick="searchAndAddMemberToCurrentGroup()" class="flex-1 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl transition-colors shadow-lg">
+          招待・追加する
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // トースト通知を表示
+    function showToast(message, type = "info") {
+      const container = document.getElementById('toastContainer');
+      if (!container) return;
+
+      const toast = document.createElement('div');
+      toast.className = `px-4 py-2.5 rounded-full text-xs font-bold text-white shadow-xl backdrop-blur-md flex items-center gap-2 transition-all transform translate-y-[-10px] opacity-0 pointer-events-auto ${type === 'warning' ? 'bg-amber-600/90 border border-amber-500' : 'bg-rose-600/90 border border-rose-500'}`;
+      toast.innerHTML = `<span>${message}</span>`;
+
+      container.appendChild(toast);
+
+      requestAnimationFrame(() => {
+        toast.classList.remove('translate-y-[-10px]', 'opacity-0');
+      });
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-[-10px]');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
