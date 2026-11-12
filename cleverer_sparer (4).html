@@ -1,0 +1,1508 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Cleverer Sparer - 買いなさんな！無駄遣い防止アドバイザー</title>
+    <script>
+        (function(){try{var t=localStorage.getItem('cleverer_sparer_theme');if(t==='dark'||(!t&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark')}catch(e){}})();
+        function syncThemeIcon(){var i=document.getElementById('theme-icon');if(i)i.className='fa-solid '+(document.documentElement.classList.contains('dark')?'fa-sun':'fa-moon')+' text-lg'}
+        document.addEventListener('DOMContentLoaded',syncThemeIcon);
+        window.toggleTheme=function(){var d=document.documentElement.classList.toggle('dark');try{localStorage.setItem('cleverer_sparer_theme',d?'dark':'light')}catch(e){}syncThemeIcon()};
+    </script>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Zen+Maru+Gothic:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Nunito', 'Zen Maru Gothic', 'Hiragino Maru Gothic ProN', sans-serif;
+        }
+
+        /* --- Dark mode --- */
+        html.dark { color-scheme: dark; }
+        html.dark .bg-slate-100 { background-color: #0b1220; }
+        html.dark .bg-white { background-color: #1e293b; }
+        html.dark .bg-white\/80, html.dark .bg-white\/90, html.dark .bg-white\/95 { background-color: rgba(15,23,42,.88); }
+        html.dark .bg-slate-50, html.dark .bg-slate-50\/50, html.dark .bg-slate-50\/80 { background-color: #172033; }
+        html.dark .bg-slate-200 { background-color: #334155; }
+        html.dark .hover\:bg-slate-50:hover { background-color: #273449; }
+        html.dark .text-slate-800 { color: #f1f5f9; }
+        html.dark .text-slate-700 { color: #e2e8f0; }
+        html.dark .text-slate-600 { color: #cbd5e1; }
+        html.dark .text-slate-500 { color: #a3b1c6; }
+        html.dark .border-slate-100, html.dark .border-slate-200, html.dark .border-slate-300,
+        html.dark .border-slate-200\/50, html.dark .border-slate-200\/60, html.dark .border-slate-200\/80 { border-color: #334155; }
+        html.dark .bg-teal-50 { background-color: rgba(20,184,166,.14); }
+        html.dark .bg-teal-100, html.dark .bg-teal-100\/80 { background-color: rgba(20,184,166,.22); }
+        html.dark .bg-teal-200 { background-color: rgba(45,212,191,.35); }
+        html.dark .border-teal-100, html.dark .border-teal-200 { border-color: rgba(45,212,191,.3); }
+        html.dark .text-teal-600, html.dark .text-teal-700 { color: #5eead4; }
+        html.dark .bg-rose-50, html.dark .bg-rose-50\/70 { background-color: rgba(244,63,94,.13); }
+        html.dark .bg-rose-100 { background-color: rgba(244,63,94,.22); }
+        html.dark .border-rose-100, html.dark .border-rose-200, html.dark .border-rose-200\/60 { border-color: rgba(251,113,133,.3); }
+        html.dark .text-rose-500, html.dark .text-rose-600, html.dark .text-rose-700 { color: #fda4af; }
+        html.dark .bg-indigo-50 { background-color: rgba(99,102,241,.16); }
+        html.dark .border-indigo-100, html.dark .border-indigo-300 { border-color: rgba(129,140,248,.35); }
+        html.dark .text-indigo-600, html.dark .text-indigo-700 { color: #a5b4fc; }
+        html.dark .bg-amber-100 { background-color: rgba(245,158,11,.2); }
+        html.dark .text-amber-600 { color: #fbbf24; }
+        html.dark .text-sky-600 { color: #7dd3fc; }
+        html.dark .ring-indigo-500\/10 { --tw-ring-color: rgba(129,140,248,.2); }
+        html.dark input::placeholder, html.dark textarea::placeholder { color: #64748b; }
+        .pulse-danger {
+            animation: pulse-red 2s infinite;
+        }
+        @keyframes pulse-red {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(225, 29, 72, 0.25); }
+            50% { box-shadow: 0 0 0 12px rgba(225, 29, 72, 0); }
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .tab-content.hidden{display:none!important}
+        nav.fixed{padding-bottom:env(safe-area-inset-bottom)}
+        @media(min-width:1024px){nav.fixed{padding-bottom:0}}
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col justify-between">
+
+    <!-- Header Navigation -->
+    <header class="bg-white/80 backdrop-blur border-b border-slate-200/80 sticky top-0 z-50">
+        <div class="max-w-md md:max-w-3xl lg:max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div class="w-9 h-9 rounded-xl bg-teal-600 flex items-center justify-center text-white font-black text-lg shadow-sm">
+                    <i class="fa-solid font-black fa-hand"></i>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-lg text-slate-800 leading-tight tracking-tight" style="font-family:'Nunito','Zen Maru Gothic',sans-serif">Cleverer Sparer</h1>
+                    <p class="text-[11px] text-teal-700 font-medium">無駄遣い絶対阻止アシスタント</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="toggleTheme()" aria-label="ダークモード切り替え" class="text-slate-400 hover:text-slate-600 transition p-1">
+                    <i id="theme-icon" class="fa-solid fa-moon text-lg"></i>
+                </button>
+                <button onclick="openSettingsModal()" aria-label="設定" class="text-slate-400 hover:text-slate-600 transition p-1">
+                    <i class="fa-solid fa-gear text-lg"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container (Responsive Grid Layout for Mobile & Desktop) -->
+    <main class="max-w-md md:max-w-3xl lg:max-w-7xl mx-auto w-full flex-1 px-4 py-4 pb-28 lg:pb-8 flex flex-col gap-4 lg:grid lg:grid-cols-[20rem_minmax(0,1fr)] lg:gap-6 lg:items-start">
+
+        <!-- Sidebar / Top Panel in Desktop Layout -->
+        <aside class="flex flex-col gap-4 lg:sticky lg:top-20">
+            <!-- Banner: Total Saved & Wishlist Progress -->
+            <section class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500">今月の防いだ無駄遣い</span>
+                    <span id="saved-count-tag" class="text-xs bg-teal-50 text-teal-700 font-bold px-2.5 py-0.5 rounded-full border border-teal-200">0回阻止</span>
+                </div>
+                <div class="flex items-baseline justify-between mb-3">
+                    <div class="text-3xl font-black text-teal-700" id="total-saved-amount">￥0</div>
+                    <div class="text-xs text-slate-400 font-medium">節約成功金額</div>
+                </div>
+
+                <!-- Failed Savings Counter (防げなかった無駄遣い: 防げなかった時のみ動的に出現) -->
+                <div id="failed-savings-card" class="hidden transition-all duration-500 transform scale-95 opacity-0 bg-rose-50/70 rounded-xl p-3 mb-4 border border-rose-200/60 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-lg bg-rose-100 text-rose-600 flex items-center justify-center font-bold text-xs">
+                            <i class="fa-solid fa-face-frown"></i>
+                        </div>
+                        <div>
+                            <div class="text-xs font-bold text-slate-700">防げなかった無駄遣い</div>
+                            <div class="text-[10px] text-rose-600 font-bold" id="failed-count-tag">0回購入</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-sm font-black text-rose-600" id="total-failed-amount">￥0</div>
+                    </div>
+                </div>
+
+                <!-- Target Wishlist Quick Preview -->
+                <div id="target-wishlist-card" class="bg-slate-50/80 rounded-xl p-3.5 border border-slate-200/60 flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 shrink-0">
+                        <i class="fa-solid fa-gift text-lg"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex justify-between items-center text-xs mb-1">
+                            <span class="font-bold text-slate-700 truncate" id="wishlist-preview-title">目標が未登録です</span>
+                            <span class="text-indigo-600 font-extrabold" id="wishlist-preview-progress">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                            <div id="wishlist-progress-bar" class="bg-gradient-to-r from-indigo-500 to-teal-500 h-full w-0 transition-all duration-500"></div>
+                        </div>
+                        <p class="text-[10px] text-slate-500 mt-1 truncate" id="wishlist-preview-sub">本当に欲しいものを登録してモチベーションUP！</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Navigation Bar (Bottom on Mobile, Left-Sidebar on Desktop) -->
+            <nav class="bg-white/90 backdrop-blur border-t border-slate-200 fixed bottom-0 left-0 right-0 z-40 lg:static lg:border lg:rounded-2xl lg:shadow-sm lg:bg-white">
+                <div class="max-w-md mx-auto grid grid-cols-4 px-2 py-2 lg:max-w-none lg:grid-cols-1 lg:gap-1">
+                    <button onclick="switchTab('consult')" id="nav-consult" class="nav-btn flex flex-col items-center gap-1 py-1 lg:flex-row lg:gap-3 lg:px-4 lg:py-3 lg:rounded-xl lg:hover:bg-slate-50 text-teal-600">
+                        <i class="fa-solid fa-comments text-lg"></i>
+                        <span class="text-[10px] lg:text-sm font-bold">買い物相談</span>
+                    </button>
+                    <button onclick="switchTab('log')" id="nav-log" class="nav-btn flex flex-col items-center gap-1 py-1 lg:flex-row lg:gap-3 lg:px-4 lg:py-3 lg:rounded-xl lg:hover:bg-slate-50 text-slate-400 hover:text-slate-600">
+                        <i class="fa-solid fa-receipt text-lg"></i>
+                        <span class="text-[10px] lg:text-sm font-bold">データ記録</span>
+                    </button>
+                    <button onclick="switchTab('wishlist')" id="nav-wishlist" class="nav-btn flex flex-col items-center gap-1 py-1 lg:flex-row lg:gap-3 lg:px-4 lg:py-3 lg:rounded-xl lg:hover:bg-slate-50 text-slate-400 hover:text-slate-600">
+                        <i class="fa-solid fa-gift text-lg"></i>
+                        <span class="text-[10px] lg:text-sm font-bold">欲しい物</span>
+                    </button>
+                    <button onclick="switchTab('analytics')" id="nav-analytics" class="nav-btn flex flex-col items-center gap-1 py-1 lg:flex-row lg:gap-3 lg:px-4 lg:py-3 lg:rounded-xl lg:hover:bg-slate-50 text-slate-400 hover:text-slate-600">
+                        <i class="fa-solid fa-chart-line text-lg"></i>
+                        <span class="text-[10px] lg:text-sm font-bold">傾向分析</span>
+                    </button>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Dynamic Content Tabs -->
+        <!-- TAB 1: CONSULTATION (In-store Dilemma Advisor) -->
+        <section id="tab-consult" class="tab-content flex flex-col gap-4 xl:grid xl:grid-cols-2 xl:items-start">
+            <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm">
+                <div class="flex items-center gap-2 mb-2">
+                    <i class="fa-solid fa-comments text-amber-500 text-lg"></i>
+                    <h2 class="font-bold text-base text-slate-800">店頭で悩んだらAIに相談！</h2>
+                </div>
+                <p class="text-xs text-slate-500 mb-4 leading-relaxed">買おうか迷っている商品の写真を撮影・送信してください。過去の購入ログや栄養バランス、目標からAIが説得判定します。</p>
+
+                <!-- Photo Upload / Capture Box -->
+                <div class="relative border-2 border-dashed border-slate-300 hover:border-teal-500 transition rounded-xl p-4 text-center bg-slate-50/50" id="consult-upload-box">
+                    <input type="file" id="consult-image-input" accept="image/*" class="hidden" onchange="handleImageSelected(event, 'consult-preview')">
+                    <input type="file" id="consult-camera-input" accept="image/*" capture="environment" class="hidden" onchange="handleImageSelected(event, 'consult-preview')">
+                    <div id="consult-preview-container" class="hidden flex flex-col items-center">
+                        <img id="consult-preview" class="max-h-48 lg:max-h-72 max-w-full rounded-lg object-cover mb-2 border border-slate-200 shadow-sm">
+                        <button onclick="event.stopPropagation(); resetConsultImage()" class="text-xs text-rose-500 hover:underline"><i class="fa-solid fa-trash mr-1"></i>写真を差し替える</button>
+                    </div>
+                    <div id="consult-placeholder" class="py-6 flex flex-col items-center gap-2">
+                        <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 border border-slate-200">
+                            <i class="fa-solid fa-camera text-xl"></i>
+                        </div>
+                        <span class="text-xs font-semibold text-slate-600">商品・棚の写真をパシャリ！</span>
+                        <div class="flex flex-wrap justify-center gap-2 mt-2">
+                            <button type="button" onclick="openCamera('consult')" class="bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold px-4 py-2.5 rounded-lg shadow-sm flex items-center gap-1.5"><i class="fa-solid fa-camera"></i>カメラで撮影</button>
+                            <button type="button" onclick="triggerFileInput('consult-image-input')" class="bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 text-xs font-bold px-4 py-2.5 rounded-lg flex items-center gap-1.5"><i class="fa-solid fa-image"></i>写真を選ぶ</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Price / Optional Note Input -->
+                <div class="grid grid-cols-2 gap-3 mt-3">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 mb-1">税込価格（目安）</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-2.5 text-xs text-slate-400">￥</span>
+                            <input type="number" id="consult-price" placeholder="450" class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 pl-7 pr-3 text-xs text-slate-800 focus:outline-none focus:border-teal-500">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 mb-1">今の気持ち・迷う理由</label>
+                        <input type="text" id="consult-note" placeholder="小腹が空いた/限定品" class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 px-3 text-xs text-slate-800 focus:outline-none focus:border-teal-500">
+                    </div>
+                </div>
+
+                <!-- Action Button -->
+                <button onclick="askAdvice()" id="consult-submit-btn" class="w-full mt-4 bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-xl shadow-sm transition flex items-center justify-center gap-2 text-sm">
+                    <i class="fa-solid fa-robot"></i> AIに相談して判定してもらう
+                </button>
+            </div>
+
+            <!-- Advice Result Drawer/Box -->
+            <div id="advice-result-card" class="hidden bg-white rounded-2xl p-5 border border-slate-200/80 shadow-md flex flex-col gap-3">
+                <div id="advice-status-badge" class="self-start px-3 py-1 rounded-full font-bold text-xs uppercase tracking-wide flex items-center gap-1.5">
+                    <!-- Dynamic -->
+                </div>
+                <h3 id="advice-headline" class="font-extrabold text-lg text-slate-800 leading-snug"></h3>
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/80 text-xs text-slate-700 leading-relaxed font-medium whitespace-pre-line" id="advice-reasoning">
+                </div>
+                
+                <!-- Audio Speech Player -->
+                <div class="bg-slate-50/80 rounded-xl p-3 border border-slate-200/60 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-full bg-teal-50 text-teal-600 flex items-center justify-center">
+                            <i class="fa-solid fa-volume-high text-xs"></i>
+                        </div>
+                        <div>
+                            <div class="text-xs font-bold text-slate-700">声で説得を聞く</div>
+                            <div class="text-[10px] text-slate-400">Gemini Voice Advisor</div>
+                        </div>
+                    </div>
+                    <button id="tts-play-btn" onclick="playAdviceVoice()" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 shadow-sm text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 transition">
+                        <i class="fa-solid fa-play text-teal-600"></i> 再生
+                    </button>
+                </div>
+
+                <!-- Decision Action Buttons -->
+                <div class="grid grid-cols-2 gap-3 mt-2">
+                    <button onclick="recordConsultDecision(true)" class="bg-teal-50 hover:bg-teal-100/80 text-teal-700 border border-teal-200 font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-1 transition">
+                        <i class="fa-solid fa-circle-check"></i> 買わずに我慢した！
+                    </button>
+                    <button onclick="recordConsultDecision(false)" class="bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-1 transition">
+                        <i class="fa-solid fa-cart-shopping"></i> 結局購入した
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: RECEIPT & STOCK LOGGER -->
+        <section id="tab-log" class="tab-content hidden flex flex-col gap-4 xl:grid xl:grid-cols-2 xl:items-start">
+            <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm">
+                <div class="flex items-center gap-2 mb-2">
+                    <i class="fa-solid fa-receipt text-teal-600 text-lg"></i>
+                    <h2 class="font-bold text-base text-slate-800">レシート・購入品の自動記録</h2>
+                </div>
+                <p class="text-xs text-slate-500 mb-4 leading-relaxed">買った商品やレシートの写真をパシャリ！AIが品目・価格・栄養やジャンルを自動推測・分類して記録します。</p>
+
+                <!-- Logger Photo Upload -->
+                <div class="relative border-2 border-dashed border-slate-300 hover:border-teal-500 transition rounded-xl p-4 text-center bg-slate-50/50" id="log-upload-box">
+                    <input type="file" id="log-image-input" accept="image/*" class="hidden" onchange="handleImageSelected(event, 'log-preview')">
+                    <input type="file" id="log-camera-input" accept="image/*" capture="environment" class="hidden" onchange="handleImageSelected(event, 'log-preview')">
+                    <div id="log-preview-container" class="hidden flex flex-col items-center">
+                        <img id="log-preview" class="max-h-48 lg:max-h-72 max-w-full rounded-lg object-cover mb-2 border border-slate-200 shadow-sm">
+                        <button onclick="event.stopPropagation(); resetLogImage()" class="text-xs text-rose-500 hover:underline"><i class="fa-solid fa-trash mr-1"></i>写真を差し替える</button>
+                    </div>
+                    <div id="log-placeholder" class="py-6 flex flex-col items-center gap-2">
+                        <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 border border-slate-200">
+                            <i class="fa-solid fa-file-invoice-dollar text-xl"></i>
+                        </div>
+                        <span class="text-xs font-semibold text-slate-600">レシートや商品をパシャリ！</span>
+                        <div class="flex flex-wrap justify-center gap-2 mt-2">
+                            <button type="button" onclick="openCamera('log')" class="bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold px-4 py-2.5 rounded-lg shadow-sm flex items-center gap-1.5"><i class="fa-solid fa-camera"></i>カメラで撮影</button>
+                            <button type="button" onclick="triggerFileInput('log-image-input')" class="bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 text-xs font-bold px-4 py-2.5 rounded-lg flex items-center gap-1.5"><i class="fa-solid fa-image"></i>写真を選ぶ</button>
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="processReceiptOrItem()" id="log-submit-btn" class="w-full mt-4 bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-xl shadow-sm transition flex items-center justify-center gap-2 text-sm">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> AIで自動解析＆記録する
+                </button>
+            </div>
+
+            <!-- Stock / Past Logs List -->
+            <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="font-bold text-sm text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-boxes-packing text-teal-600"></i> 購入履歴・ストック管理
+                    </h3>
+                    <span class="text-xs text-slate-400 font-medium" id="log-count-text">0件</span>
+                </div>
+                <div id="logs-list-container" class="flex flex-col gap-2 max-h-72 lg:max-h-[32rem] overflow-y-auto pr-1">
+                    <!-- Dynamic Log Items -->
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: WISHLIST (Target Items) -->
+        <section id="tab-wishlist" class="tab-content hidden flex flex-col gap-4 xl:grid xl:grid-cols-2 xl:items-start">
+            <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm">
+                <div class="flex items-center gap-2 mb-2">
+                    <i class="fa-solid fa-heart text-rose-500 text-lg"></i>
+                    <h2 class="font-bold text-base text-slate-800">本当に欲しい物リスト (Wishlist)</h2>
+                </div>
+                <p class="text-xs text-slate-500 mb-4 leading-relaxed">ついで買いを抑えて手に入れたい高価な物や本命アイテムのWebリンクまたは情報を登録。「〇〇の購入に近づく」と説得に使われます。</p>
+
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 mb-1">商品URL (Amazonなど) または 商品名</label>
+                        <input type="text" id="wish-title" placeholder="例: https://amazon.co.jp/... または PS5本体" class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 px-3 text-xs text-slate-800 focus:outline-none focus:border-indigo-500">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-500 mb-1">目標金額 (円)</label>
+                            <input type="number" id="wish-price" placeholder="60000" class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 px-3 text-xs text-slate-800 focus:outline-none focus:border-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-500 mb-1">欲しい度・メモ</label>
+                            <input type="text" id="wish-note" placeholder="絶対欲しい！" class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 px-3 text-xs text-slate-800 focus:outline-none focus:border-indigo-500">
+                        </div>
+                    </div>
+                    <button onclick="addWishlistItem()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-sm">
+                        <i class="fa-solid fa-plus"></i> 目標Wishlistに登録
+                    </button>
+                </div>
+            </div>
+
+            <!-- Wishlist Items -->
+            <div id="wishlist-container" class="flex flex-col gap-3">
+                <!-- Dynamic Wishlist Cards -->
+            </div>
+        </section>
+
+        <!-- TAB 4: ANALYTICS & TENDENCY -->
+        <section id="tab-analytics" class="tab-content hidden flex flex-col gap-4">
+            <button onclick="openYearReport()" class="w-full text-left bg-gradient-to-r from-teal-600 to-emerald-500 text-white rounded-2xl p-5 shadow-sm flex items-center gap-3">
+                <i class="fa-solid fa-trophy text-2xl"></i>
+                <div class="flex-1">
+                    <div class="font-extrabold text-base">年間レポート・成績表</div>
+                    <div class="text-[11px] opacity-90">今年どれだけ無駄遣いを防げたかチェック！</div>
+                </div>
+                <i class="fa-solid fa-chevron-right"></i>
+            </button>
+            <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm">
+                <div class="flex items-center gap-2 mb-3">
+                    <i class="fa-solid fa-chart-pie text-indigo-600 text-lg"></i>
+                    <h2 class="font-bold text-base text-slate-800">AI購入傾向＆ストック診断</h2>
+                </div>
+                <div id="analytics-summary" class="bg-slate-50 rounded-xl p-4 border border-slate-200/80 text-xs text-slate-600 leading-relaxed mb-4">
+                    データが集まると、AIがあなたのついで買い傾向や栄養過不足、ストック重複パターンを自動判定します。
+                </div>
+
+                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">ジャンル別購入カウント</h4>
+                <div id="category-stats" class="space-y-2">
+                    <!-- Dynamic stats bars -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Year Report Modal -->
+    <div id="report-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-sm w-full max-h-[90vh] overflow-y-auto border border-slate-200 shadow-xl">
+            <div class="bg-gradient-to-br from-teal-600 to-emerald-500 text-white p-5 rounded-t-2xl relative">
+                <button onclick="closeYearReport()" class="absolute top-3 right-3 text-white/80 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+                <div class="text-[11px] font-bold opacity-90">Cleverer Sparer 年間レポート</div>
+                <div class="flex items-center gap-2 mt-1">
+                    <select id="report-year" onchange="renderYearReport()" class="bg-white/20 rounded-lg px-2 py-1 text-sm font-extrabold outline-none"></select>
+                    <span id="report-mode" class="text-xs opacity-90"></span>
+                </div>
+            </div>
+            <div id="report-body" class="p-5 space-y-4"></div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-sm w-full max-h-[90vh] overflow-y-auto p-5 border border-slate-200 shadow-xl space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-gear text-teal-600"></i> 設定・環境
+                </h3>
+                <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            
+            <div>
+                <label class="block text-xs font-bold text-slate-600 mb-1">使用モード（対象）</label>
+                <div class="bg-slate-100 p-1 rounded-xl flex items-center text-xs font-bold text-slate-500">
+                    <button id="mode-btn-personal" onclick="switchMode('personal')" class="flex-1 py-2 rounded-lg flex items-center justify-center gap-1.5 transition bg-white text-teal-700 shadow-sm">
+                        <i class="fa-solid fa-user"></i> 個人用
+                    </button>
+                    <button id="mode-btn-family" onclick="switchMode('family')" class="flex-1 py-2 rounded-lg flex items-center justify-center gap-1.5 transition hover:text-slate-700">
+                        <i class="fa-solid fa-users"></i> 家族用
+                    </button>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-600 mb-1">Gemini API Key (任意)</label>
+                <input type="password" id="api-key-input" placeholder="環境変数に未設定の場合は入力" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs text-slate-800 focus:outline-none focus:border-teal-500">
+                <p class="text-[10px] text-slate-400 mt-1">※Canvas環境下では空欄のままで自動付与されます。</p>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-600 mb-1">AI説得のトーン</label>
+                <select id="ai-tone-select" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs text-slate-800 focus:outline-none focus:border-teal-500">
+                    <option value="strict">辛口＆情熱的（無駄遣い絶対に許さない）</option>
+                    <option value="logical">論理派（データ・栄養過不足重視）</option>
+                    <option value="gentle">優しく寄り添うスタイル</option>
+                </select>
+            </div>
+
+            <div class="pt-2 flex justify-between gap-2 border-t border-slate-100">
+                <button onclick="resetAllData()" class="text-xs text-rose-500 hover:text-rose-600 font-bold px-2 py-1">全データリセット</button>
+                <button onclick="saveSettings()" class="bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold px-4 py-2 rounded-lg shadow-sm">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Camera Modal -->
+    <div id="camera-modal" class="fixed inset-0 z-[60] hidden flex items-center justify-center bg-black/80 lg:p-6">
+        <div class="bg-black w-full h-full lg:h-auto lg:max-w-2xl lg:rounded-2xl overflow-hidden flex flex-col">
+            <div class="flex items-center justify-between px-4 py-3 text-white text-sm font-bold" style="padding-top:calc(.75rem + env(safe-area-inset-top))">
+                <span id="camera-title">カメラ</span>
+                <button type="button" onclick="closeCamera()" aria-label="閉じる"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="flex-1 min-h-0 flex items-center justify-center bg-black">
+                <video id="camera-video" autoplay playsinline muted class="w-full h-full lg:h-auto lg:max-h-[65vh] object-contain"></video>
+            </div>
+            <div class="flex items-center justify-center gap-8 pt-5" style="padding-bottom:calc(1.25rem + env(safe-area-inset-bottom))">
+                <button type="button" id="flip-btn" onclick="flipCamera()" class="w-12 h-12 rounded-full bg-white/15 text-white" aria-label="カメラ切替"><i class="fa-solid fa-camera-rotate"></i></button>
+                <button type="button" onclick="takePhoto()" class="w-16 h-16 rounded-full bg-white border-4 border-teal-500 active:scale-95 transition" aria-label="撮影"></button>
+                <span class="w-12"></span>
+            </div>
+        </div>
+    </div>
+    <div id="toast-box" class="fixed left-1/2 -translate-x-1/2 bottom-24 lg:bottom-6 z-[70] flex flex-col gap-2 items-center pointer-events-none w-[calc(100%-2rem)] max-w-sm"></div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-50 hidden flex flex-col items-center justify-center p-4 gap-3 text-center">
+        <div class="w-12 h-12 border-4 border-teal-500 border-t-transparent rounded-full animate-spin"></div>
+        <div class="font-bold text-white text-sm" id="loading-text">AIがデータを解析中...</div>
+        <div class="text-xs text-slate-200" id="loading-sub">過去の購入履歴と栄養データを照合しています</div>
+    </div>
+
+    <script>
+        // Global State & Storage Key
+        const STORAGE_KEY = 'wisesaver_ai_data_v2';
+        const TONES = {
+            strict: '熱く、辛口で絶対に無駄遣いを許さない力強い言葉',
+            logical: 'データと栄養面を重視した論理的で分かりやすい説得',
+            gentle: '優しく寄り添い、気持ちを受け止めながら諭す言葉'
+        };
+        const TTS_STYLE = { strict: '感情を込めて熱く力強く説得して', logical: '落ち着いた声で論理的に説明して', gentle: '優しく穏やかに語りかけて' };
+        
+        // Structure supporting Personal and Family modes
+        let appData = {
+            currentMode: 'personal', // 'personal' or 'family'
+            settings: {
+                apiKey: "",
+                tone: "strict"
+            },
+            personal: {
+                savedAmount: 1420,
+                savedCount: 4,
+                failedAmount: 0,
+                failedCount: 0,
+                logs: [
+                    { id: 1, name: "ポテトチップス コンソメ味", price: 178, count: 2, category: "スナック・お菓子", nutrition: "高脂質・炭水化物中心 (約680kcal)", isWasteRisk: true, date: "2026-11-04" },
+                    { id: 2, name: "エナジードリンク 355ml", price: 220, count: 3, category: "飲料・嗜好品", nutrition: "カフェイン・糖質過多", isWasteRisk: true, date: "2026-11-05" }
+                ],
+                wishlist: [
+                    { id: 101, title: "PlayStation 5 デジタル・エディション", price: 65000, isTarget: true, note: "ずっと買いたかったゲーム機！" }
+                ]
+            },
+            family: {
+                savedAmount: 3800,
+                savedCount: 6,
+                failedAmount: 0,
+                failedCount: 0,
+                logs: [
+                    { id: 201, name: "高級アイスファミリーパック", price: 580, count: 1, category: "スナック・お菓子", nutrition: "糖質過多", isWasteRisk: true, date: "2026-11-06" },
+                    { id: 202, name: "たまご 10個入パック", price: 258, count: 1, category: "生鮮・食品", nutrition: "タンパク質・アミノ酸豊富", isWasteRisk: false, date: "2026-11-06" }
+                ],
+                wishlist: [
+                    { id: 201, title: "家族で行く温泉旅行", price: 120000, isTarget: true, note: "年末の家族旅行費用" }
+                ]
+            }
+        };
+
+        // --- Tab Navigation (Explicitly in Global Scope) ---
+        window.switchTab = function(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            const target = document.getElementById(`tab-${tabId}`);
+            if (target) target.classList.remove('hidden');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('text-teal-600');
+                btn.classList.add('text-slate-400');
+            });
+            const activeNav = document.getElementById(`nav-${tabId}`);
+            if (activeNav) {
+                activeNav.classList.remove('text-slate-400');
+                activeNav.classList.add('text-teal-600');
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        // Helper to get active state profile
+        function getActiveState() {
+            return appData[appData.currentMode] || appData.personal;
+        }
+
+        let currentConsultAudioBlobUrl = null;
+        let lastAdviceData = null;
+        let currentVoice = null;
+
+        // Init App on Load
+        window.onload = () => {
+            loadState();
+            renderAll();
+            const now = new Date(), m = now.getMonth(), d = now.getDate();
+            const ry = (m === 11 && d >= 20) ? now.getFullYear() : (m === 0 && d <= 15 ? now.getFullYear() - 1 : null);
+            if (ry && appData.reportSeen !== ry) { appData.reportSeen = ry; saveState(); openYearReport(ry); }
+        };
+
+        function loadState() {
+            const data = localStorage.getItem(STORAGE_KEY);
+            if (data) {
+                try {
+                    const parsed = JSON.parse(data);
+                    if (parsed.personal && parsed.family) {
+                        appData = { ...appData, ...parsed, settings: { ...appData.settings, ...(parsed.settings || {}) } };
+                    }
+                } catch(e) {
+                    console.error("Failed to parse storage", e);
+                }
+            } else {
+                saveState();
+            }
+            ['personal','family'].forEach(m => {
+                const st = appData[m];
+                st.decisions = st.decisions || [];
+                if (!st.legacyYear) {
+                    const ys = (st.logs || []).map(l => parseInt(String(l.date || '').slice(0, 4))).filter(Boolean);
+                    st.legacyYear = ys.length ? Math.min(...ys) : new Date().getFullYear();
+                }
+            });
+            saveState();
+            updateModeButtonsUI();
+        }
+
+        function saveState() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+        }
+
+        // --- Year-end Report ---
+        function yearStats(state, y) {
+            const dec = (state.decisions || []).filter(d => String(d.date).startsWith(String(y)));
+            const allS = (state.decisions || []).filter(d => d.resisted), allF = (state.decisions || []).filter(d => !d.resisted);
+            const sum = a => a.reduce((t, d) => t + (Number(d.amount) || 0), 0);
+            const lg = state.legacyYear === y;
+            const lSA = lg ? Math.max(0, (state.savedAmount || 0) - sum(allS)) : 0;
+            const lSC = lg ? Math.max(0, (state.savedCount || 0) - allS.length) : 0;
+            const lFA = lg ? Math.max(0, (state.failedAmount || 0) - sum(allF)) : 0;
+            const lFC = lg ? Math.max(0, (state.failedCount || 0) - allF.length) : 0;
+            const months = Array(12).fill(0);
+            dec.filter(d => d.resisted).forEach(d => months[parseInt(String(d.date).slice(5, 7)) - 1] += Number(d.amount) || 0);
+            return {
+                sA: sum(dec.filter(d => d.resisted)) + lSA, sC: dec.filter(d => d.resisted).length + lSC,
+                fA: sum(dec.filter(d => !d.resisted)) + lFA, fC: dec.filter(d => !d.resisted).length + lFC,
+                months, undated: lSA
+            };
+        }
+        window.openYearReport = function(y) {
+            const st = getActiveState();
+            const ys = new Set([new Date().getFullYear(), st.legacyYear]);
+            (st.decisions || []).forEach(d => ys.add(parseInt(String(d.date).slice(0, 4))));
+            const sel = document.getElementById('report-year');
+            sel.innerHTML = [...ys].filter(Boolean).sort((a, b) => b - a).map(v => `<option value="${v}">${v}年</option>`).join('');
+            sel.value = String(y || new Date().getFullYear());
+            document.getElementById('report-modal').classList.remove('hidden');
+            renderYearReport();
+        };
+        window.closeYearReport = function() { document.getElementById('report-modal').classList.add('hidden'); };
+        window.renderYearReport = function() {
+            const st = getActiveState(), y = parseInt(document.getElementById('report-year').value);
+            document.getElementById('report-mode').textContent = appData.currentMode === 'personal' ? '個人' : '家族';
+            const r = yearStats(st, y), total = r.sC + r.fC, yen = n => '￥' + Math.round(n).toLocaleString();
+            const rate = total ? Math.round(r.sC / total * 100) : 0;
+            const G = rate >= 90 ? ['S', '鉄の財布マスター！', 'text-amber-500'] : rate >= 75 ? ['A', '誘惑にかなり強い！', 'text-teal-600'] : rate >= 60 ? ['B', 'なかなか良い調子', 'text-sky-600'] : rate >= 40 ? ['C', 'あと一歩！来年は伸びしろ大', 'text-slate-600'] : ['D', '来年こそ財布を守ろう！', 'text-rose-600'];
+            const wasteMap = {};
+            st.logs.filter(l => l.isWasteRisk && String(l.date).startsWith(String(y))).forEach(l => wasteMap[l.category] = (wasteMap[l.category] || 0) + (Number(l.price) || 0) * (Number(l.count) || 1));
+            const top = Object.entries(wasteMap).sort((a, b) => b[1] - a[1])[0];
+            const mx = Math.max(...r.months, 1), bi = r.months.indexOf(Math.max(...r.months));
+            const goal = (st.wishlist || []).find(w => w.isTarget && w.price > 0);
+            if (!total) { document.getElementById('report-body').innerHTML = `<p class="text-sm text-slate-500 text-center py-6">${y}年の相談記録はまだありません。<br>買い物相談で「我慢した／買っちゃった」を記録すると成績が表示されます。</p>`; return; }
+            document.getElementById('report-body').innerHTML = `
+                <div class="text-center">
+                    <div class="text-[11px] font-bold text-slate-400">総合評価（我慢成功率 ${rate}%）</div>
+                    <div class="text-6xl font-black ${G[2]} leading-none my-1">${G[0]}</div>
+                    <div class="text-sm font-bold text-slate-700">${G[1]}</div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="bg-teal-50 rounded-xl p-3 border border-teal-100"><div class="text-[10px] font-bold text-teal-700">防げた無駄遣い</div><div class="text-lg font-extrabold text-teal-700">${yen(r.sA)}</div><div class="text-[10px] text-teal-700/80">${r.sC}回 成功</div></div>
+                    <div class="bg-rose-50 rounded-xl p-3 border border-rose-100"><div class="text-[10px] font-bold text-rose-700">防げなかった</div><div class="text-lg font-extrabold text-rose-700">${yen(r.fA)}</div><div class="text-[10px] text-rose-700/80">${r.fC}回</div></div>
+                </div>
+                <div>
+                    <div class="text-[11px] font-bold text-slate-400 mb-1">月別の節約額</div>
+                    <div class="flex items-end gap-1 h-20">${r.months.map((v, i) => `<div class="flex-1 flex flex-col items-center justify-end h-full"><div class="w-full rounded-t ${i === bi && v ? 'bg-emerald-500' : 'bg-teal-200'}" style="height:${Math.max(v / mx * 100, v ? 6 : 2)}%"></div><div class="text-[9px] text-slate-400 mt-0.5">${i + 1}</div></div>`).join('')}</div>
+                    ${r.months[bi] ? `<div class="text-[11px] text-slate-600 mt-1">ベスト月は <b>${bi + 1}月</b>（${yen(r.months[bi])}）</div>` : ''}
+                </div>
+                ${goal ? `<div class="bg-slate-50 rounded-xl p-3 text-xs text-slate-700 border border-slate-200">防げた金額は、目標「<b>${escapeHtml(goal.title)}</b>」の <b>${Math.min(100, Math.round(r.sA / goal.price * 100))}%</b> 分に相当！</div>` : ''}
+                ${top ? `<div class="text-xs text-slate-600">無駄になりがちだったジャンル：<b>${escapeHtml(top[0])}</b>（${yen(top[1])}）</div>` : ''}
+                ${r.undated ? `<div class="text-[10px] text-slate-400">※日付のない過去分 ${yen(r.undated)} を含みます（月別グラフには反映されません）</div>` : ''}
+                <button onclick="copyYearReport()" class="w-full bg-teal-600 text-white font-bold text-sm rounded-xl py-2.5"><i class="fa-solid fa-copy mr-1"></i>成績をコピー</button>`;
+            window._reportText = `【Cleverer Sparer ${y}年の成績】総合評価 ${G[0]}（我慢成功率${rate}%）\n防げた無駄遣い ${yen(r.sA)}（${r.sC}回）／防げなかった ${yen(r.fA)}（${r.fC}回）`;
+        };
+        window.copyYearReport = function() {
+            navigator.clipboard?.writeText(window._reportText || '').then(() => toast('成績をコピーしました！'), () => toast('コピーできませんでした', 'error'));
+        };
+
+        // --- Mode Switcher ---
+        window.switchMode = function(mode) {
+            if (appData.currentMode === mode) return;
+            appData.currentMode = mode;
+            saveState();
+            updateModeButtonsUI();
+            renderAll();
+        };
+
+        function updateModeButtonsUI() {
+            const personalBtn = document.getElementById('mode-btn-personal');
+            const familyBtn = document.getElementById('mode-btn-family');
+
+            if (personalBtn && familyBtn) {
+                if (appData.currentMode === 'personal') {
+                    personalBtn.className = "flex-1 py-1.5 rounded-lg flex items-center justify-center gap-1.5 transition bg-white text-teal-700 shadow-sm font-bold";
+                    familyBtn.className = "flex-1 py-1.5 rounded-lg flex items-center justify-center gap-1.5 transition text-slate-500 hover:text-slate-700 font-bold";
+                } else {
+                    familyBtn.className = "flex-1 py-1.5 rounded-lg flex items-center justify-center gap-1.5 transition bg-white text-indigo-700 shadow-sm font-bold";
+                    personalBtn.className = "flex-1 py-1.5 rounded-lg flex items-center justify-center gap-1.5 transition text-slate-500 hover:text-slate-700 font-bold";
+                }
+            }
+        }
+
+        // --- Render Functions ---
+        function renderAll() {
+            renderHeaderSummary();
+            renderLogs();
+            renderWishlist();
+            renderAnalytics();
+        }
+
+        function renderHeaderSummary() {
+            const state = getActiveState();
+            const savedAmountEl = document.getElementById('total-saved-amount');
+            const savedCountTagEl = document.getElementById('saved-count-tag');
+            const failedAmountEl = document.getElementById('total-failed-amount');
+            const failedCountTagEl = document.getElementById('failed-count-tag');
+            const failedCardEl = document.getElementById('failed-savings-card');
+
+            if (savedAmountEl) savedAmountEl.innerText = `￥${(state.savedAmount || 0).toLocaleString()}`;
+            if (savedCountTagEl) savedCountTagEl.innerText = `${appData.currentMode === 'personal' ? '個人' : '家族'}・${state.savedCount || 0}回阻止`;
+
+            // 防げなかった無駄遣いがある時だけ出現させる
+            if (failedCardEl) {
+                if ((state.failedCount || 0) > 0 || (state.failedAmount || 0) > 0) {
+                    failedCardEl.classList.remove('hidden');
+                    // 枠線とフェードインのアニメーション適用
+                    setTimeout(() => {
+                        failedCardEl.classList.remove('scale-95', 'opacity-0');
+                        failedCardEl.classList.add('scale-100', 'opacity-100');
+                    }, 50);
+                    if (failedAmountEl) failedAmountEl.innerText = `￥${(state.failedAmount || 0).toLocaleString()}`;
+                    if (failedCountTagEl) failedCountTagEl.innerText = `${state.failedCount || 0}回購入`;
+                } else {
+                    failedCardEl.classList.add('hidden', 'scale-95', 'opacity-0');
+                    failedCardEl.classList.remove('scale-100', 'opacity-100');
+                }
+            }
+
+            const targetWish = state.wishlist.find(w => w.isTarget) || state.wishlist[0];
+            const titleEl = document.getElementById('wishlist-preview-title');
+            const progEl = document.getElementById('wishlist-preview-progress');
+            const barEl = document.getElementById('wishlist-progress-bar');
+            const subEl = document.getElementById('wishlist-preview-sub');
+
+            if (targetWish) {
+                if (titleEl) titleEl.innerText = targetWish.title;
+                const percent = Math.min(100, Math.round((state.savedAmount / (targetWish.price || 1)) * 100));
+                if (progEl) progEl.innerText = `${percent}%`;
+                if (barEl) barEl.style.width = `${percent}%`;
+                if (subEl) subEl.innerText = `あと ￥${Math.max(0, targetWish.price - state.savedAmount).toLocaleString()} の節約で手に入る！`;
+            } else {
+                if (titleEl) titleEl.innerText = "目標が未登録です";
+                if (progEl) progEl.innerText = "0%";
+                if (barEl) barEl.style.width = "0%";
+                if (subEl) subEl.innerText = "「欲しい物」タブから本命を登録しよう！";
+            }
+        }
+
+        function renderLogs() {
+            const state = getActiveState();
+            const container = document.getElementById('logs-list-container');
+            const logCountEl = document.getElementById('log-count-text');
+            if (logCountEl) logCountEl.innerText = `${state.logs.length}件`;
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (state.logs.length === 0) {
+                container.innerHTML = '<div class="text-xs text-slate-400 text-center py-6">過去の登録データはありません。</div>';
+                return;
+            }
+
+            // カテゴリ別にグループ化
+            const groupedLogs = {};
+            state.logs.slice().reverse().forEach(log => {
+                const cat = log.category || 'その他';
+                if (!groupedLogs[cat]) groupedLogs[cat] = [];
+                groupedLogs[cat].push(log);
+            });
+
+            // カテゴリごとに描画
+            Object.keys(groupedLogs).forEach(category => {
+                const categoryHeader = document.createElement('div');
+                categoryHeader.className = 'text-[11px] font-bold text-slate-500 pt-2 pb-1 border-b border-slate-200/60 flex items-center justify-between sticky top-0 bg-white/95 backdrop-blur z-10';
+                categoryHeader.innerHTML = `<span><i class="fa-solid fa-folder text-teal-600 mr-1.5"></i>${escapeHtml(category)}</span><span class="text-[10px] text-slate-400 font-normal">${groupedLogs[category].length}件</span>`;
+                container.appendChild(categoryHeader);
+
+                groupedLogs[category].forEach(log => {
+                    const el = document.createElement('div');
+                    el.className = 'bg-slate-50/80 p-3 rounded-xl border border-slate-200/80 flex justify-between items-center text-xs ml-1';
+                    el.innerHTML = `
+                        <div class="flex items-center gap-3 min-w-0">
+                            <div class="w-8 h-8 rounded-lg ${log.isWasteRisk ? 'bg-amber-100 text-amber-600' : 'bg-teal-100 text-teal-600'} flex items-center justify-center shrink-0">
+                                <i class="fa-solid ${log.isWasteRisk ? 'fa-triangle-exclamation' : 'fa-basket-shopping'}"></i>
+                            </div>
+                            <div class="truncate">
+                                <div class="font-bold text-slate-700 truncate">${escapeHtml(log.name)}${log.count > 1 ? ' ×' + Number(log.count) : ''}</div>
+                                <div class="text-[10px] text-slate-400">${log.date || ''} • ${escapeHtml(log.nutrition) || '栄養推測なし'}</div>
+                            </div>
+                        </div>
+                        <div class="text-right shrink-0">
+                            <div class="font-bold text-slate-800">￥${(log.price || 0).toLocaleString()}</div>
+                            <button onclick="deleteLog(${log.id})" class="text-[10px] text-slate-400 hover:text-rose-500 transition"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    `;
+                    container.appendChild(el);
+                });
+            });
+        }
+
+        function renderWishlist() {
+            const state = getActiveState();
+            const container = document.getElementById('wishlist-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (state.wishlist.length === 0) {
+                container.innerHTML = '<div class="text-xs text-slate-400 text-center py-6">欲しい物リストは空です。</div>';
+                return;
+            }
+
+            state.wishlist.forEach(item => {
+                const percent = Math.min(100, Math.round((state.savedAmount / (item.price || 1)) * 100));
+                const el = document.createElement('div');
+                el.className = `bg-white p-4 rounded-2xl border ${item.isTarget ? 'border-indigo-300 ring-2 ring-indigo-500/10' : 'border-slate-200/80'} shadow-sm space-y-2 relative`;
+                el.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            ${item.isTarget ? '<span class="bg-indigo-600 text-white text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider mb-1 inline-block">優先ターゲット</span>' : ''}
+                            <h3 class="font-bold text-sm text-slate-800">${escapeHtml(item.title)}</h3>
+                            <p class="text-xs text-slate-400">${escapeHtml(item.note || 'メモなし')}</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-black text-teal-600 text-sm">￥${item.price.toLocaleString()}</div>
+                            <button onclick="deleteWishlistItem(${item.id})" class="text-xs text-slate-400 hover:text-rose-500 transition mt-1"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+                    <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden border border-slate-200/50">
+                        <div class="bg-gradient-to-r from-indigo-500 to-teal-500 h-full" style="width: ${percent}%"></div>
+                    </div>
+                    <div class="flex justify-between items-center text-[10px] text-slate-400">
+                        <span>達成度: ${percent}%</span>
+                        ${!item.isTarget ? `<button onclick="setTargetWishlist(${item.id})" class="text-indigo-600 font-bold hover:underline">本命目標に設定</button>` : '<span class="text-teal-600 font-bold"><i class="fa-solid fa-check mr-1"></i>設定中</span>'}
+                    </div>
+                `;
+                container.appendChild(el);
+            });
+        }
+
+        function renderAnalytics() {
+            const state = getActiveState();
+            const catMap = {};
+            let wasteCount = 0;
+            const wasteMap = {};
+            state.logs.forEach(l => {
+                catMap[l.category] = (catMap[l.category] || 0) + 1;
+                if (l.isWasteRisk) { wasteCount++; wasteMap[l.category] = (wasteMap[l.category] || 0) + 1; }
+            });
+
+            const topWaste = Object.keys(wasteMap).sort((a, b) => wasteMap[b] - wasteMap[a])[0];
+            const summaryEl = document.getElementById('analytics-summary');
+            const modeLabel = appData.currentMode === 'personal' ? '個人' : '家族';
+            if (summaryEl) {
+                if (state.logs.length > 0) {
+                    summaryEl.innerHTML = `
+                        <p class="font-bold text-slate-700 mb-1"><i class="fa-solid fa-brain text-teal-600 mr-1.5"></i>AIお買い物診断結果 (${modeLabel}モード)</p>
+                        これまでに記録された<b>${state.logs.length}件</b>の購入のうち、無駄遣い・お菓子・ついで買いリスクのある商品が<b>${wasteCount}件</b>含まれています。<br>
+                        ${topWaste ? `特に<b>「${escapeHtml(topWaste)}」</b>でリスクのある購入が目立ちます。` : ''}店内で迷ったら必ず<b>買い物相談機能</b>を活用してください！
+                    `;
+                } else {
+                    summaryEl.innerHTML = `<p class="text-slate-500 text-center">${modeLabel}の記録データがまだありません。</p>`;
+                }
+            }
+
+            const statsContainer = document.getElementById('category-stats');
+            if (!statsContainer) return;
+            statsContainer.innerHTML = '';
+            const total = state.logs.length || 1;
+            Object.keys(catMap).forEach(cat => {
+                const count = catMap[cat];
+                const pct = Math.round((count / total) * 100);
+                statsContainer.innerHTML += `
+                    <div>
+                        <div class="flex justify-between text-xs text-slate-600 mb-1">
+                            <span>${escapeHtml(cat)}</span>
+                            <span>${count}件 (${pct}%)</span>
+                        </div>
+                        <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                            <div class="bg-teal-500 h-full" style="width: ${pct}%"></div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // --- Global Helper Functions ---
+        window.triggerFileInput = function(id) {
+            const input = document.getElementById(id);
+            if (input) input.click();
+        };
+
+        window.openSettingsModal = function() {
+            const keyInput = document.getElementById('api-key-input');
+            const toneSelect = document.getElementById('ai-tone-select');
+            if (keyInput) keyInput.value = appData.settings.apiKey || '';
+            if (toneSelect) toneSelect.value = appData.settings.tone || 'strict';
+            const modal = document.getElementById('settings-modal');
+            if (modal) modal.classList.remove('hidden');
+        };
+
+        window.closeSettingsModal = function() {
+            const modal = document.getElementById('settings-modal');
+            if (modal) modal.classList.add('hidden');
+        };
+
+        window.saveSettings = function() {
+            const keyInput = document.getElementById('api-key-input');
+            const toneSelect = document.getElementById('ai-tone-select');
+            if (keyInput) appData.settings.apiKey = keyInput.value.trim();
+            if (toneSelect) appData.settings.tone = toneSelect.value;
+            saveState();
+            closeSettingsModal();
+            toast("設定を保存しました。");
+        };
+
+        window.resetAllData = function() {
+            if (confirm("全ての履歴やWishlist、節約額を初期化しますか？")) {
+                localStorage.removeItem(STORAGE_KEY);
+                location.reload();
+            }
+        };
+
+        window.addWishlistItem = function() {
+            const titleInput = document.getElementById('wish-title');
+            const priceInput = document.getElementById('wish-price');
+            const noteInput = document.getElementById('wish-note');
+
+            if (!titleInput || !priceInput || !titleInput.value.trim() || !(Number(priceInput.value) > 0)) {
+                toast("商品名/URLと目標金額を入力してください！");
+                return;
+            }
+
+            const state = getActiveState();
+            const newItem = {
+                id: Date.now(),
+                title: titleInput.value,
+                price: Number(priceInput.value),
+                isTarget: state.wishlist.length === 0,
+                note: noteInput ? noteInput.value : ''
+            };
+
+            state.wishlist.push(newItem);
+            saveState();
+            renderAll();
+
+            titleInput.value = '';
+            priceInput.value = '';
+            if (noteInput) noteInput.value = '';
+            toast(`${appData.currentMode === 'personal' ? '個人' : '家族'}目標Wishlistに追加しました！`);
+        };
+
+        window.setTargetWishlist = function(id) {
+            const state = getActiveState();
+            state.wishlist.forEach(w => w.isTarget = (w.id === id));
+            saveState();
+            renderAll();
+        };
+
+        window.deleteWishlistItem = function(id) {
+            const state = getActiveState();
+            state.wishlist = state.wishlist.filter(w => w.id !== id);
+            saveState();
+            renderAll();
+        };
+
+        window.deleteLog = function(id) {
+            const state = getActiveState();
+            state.logs = state.logs.filter(l => l.id !== id);
+            saveState();
+            renderAll();
+        };
+
+        // --- Receipt privacy redaction (on-device OCR, nothing is sent anywhere) ---
+        const RX_RECEIPT = /合計|小計|税|釣|お預|現金|領収|レシート|点数|クレジット|TOTAL|SUBTOTAL|CHANGE|T\d{13}/i;
+        const RX_PRICE_END = /\d[\d,]+[円*軽]?$/;
+        const RX_DATE = /\d{2,4}[\/.\-年]\d{1,2}[\/.\-月]\d{1,2}|\d{1,2}:\d{2}/;
+        const RX_PII = [
+            /〒|郵便/, /\d{3}-\d{4}/, /TEL|電話|℡|☎|FAX/i, /0\d{1,4}-\d{1,4}-\d{3,4}/,
+            /(東京都|北海道|京都府|大阪府|.{2,3}県).{1,8}(市|区|町|村|郡)/, /丁目|番地|\d+番\d+号|号室/,
+            /https?:|www\.|@|\.(com|jp)\b/i, /T\d{13}|登録番号|法人番号/,
+            /会員|カード番号|カードNo|氏名|お名前|様$|担当|責任者|取扱者/, /\d{8,}/
+        ];
+        const RX_STORE = /株式会社|有限会社|\(株\)|㈱|支店|営業所|本店|店舗|店$/;
+
+        function loadTesseract() {
+            if (window.Tesseract) return Promise.resolve();
+            return new Promise((ok, ng) => {
+                const sc = document.createElement('script');
+                sc.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';
+                sc.onload = ok; sc.onerror = () => ng(new Error('OCR library load failed'));
+                document.head.appendChild(sc);
+            });
+        }
+
+        async function redactReceipt(dataUrl) {
+            await loadTesseract();
+            window._ocrWorker = window._ocrWorker || await Tesseract.createWorker('jpn+eng');
+            const img = await new Promise((ok, ng) => { const im = new Image(); im.onload = () => ok(im); im.onerror = ng; im.src = dataUrl; });
+            const c = document.createElement('canvas');
+            c.width = img.width; c.height = img.height;
+            const ctx = c.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+            const { data } = await window._ocrWorker.recognize(c);
+            const lines = (data.lines || (data.blocks || []).flatMap(b => b.paragraphs.flatMap(p => p.lines)))
+                .map(l => ({ t: (l.text || '').normalize('NFKC').replace(/\s+/g, ''), b: l.bbox }))
+                .filter(l => l.t && l.b).sort((x, y) => x.b.y0 - y.b.y0);
+            const isReceipt = lines.filter(l => RX_RECEIPT.test(l.t)).length >= 2;
+            if (!isReceipt) return { url: dataUrl, receipt: false, n: 0 };
+            const hit = new Set();
+            lines.forEach((l, i) => {
+                const priced = RX_PRICE_END.test(l.t);
+                if (RX_PII.some(r => r.test(l.t)) || (!priced && RX_STORE.test(l.t))) hit.add(i);
+            });
+            // The store name is usually printed at the top: black out the first two non-price, non-date lines
+            let head = 0;
+            lines.forEach((l, i) => {
+                if (head >= 2 || l.b.y0 > c.height * 0.3) return;
+                if (RX_PRICE_END.test(l.t) || RX_DATE.test(l.t) || /領収|レシート|RECEIPT/i.test(l.t)) return;
+                hit.add(i); head++;
+            });
+            ctx.fillStyle = '#000';
+            hit.forEach(i => {
+                const b = lines[i].b, pad = Math.max(4, (b.y1 - b.y0) * 0.25);
+                ctx.fillRect(b.x0 - pad, b.y0 - pad, (b.x1 - b.x0) + pad * 2, (b.y1 - b.y0) + pad * 2);
+            });
+            return { url: c.toDataURL('image/jpeg', 0.85), receipt: true, n: hit.size };
+        }
+
+        async function setPreview(key, dataUrl) {
+            showLoading('個人情報を確認中…', 'レシートの店名・住所・電話番号などを端末内で自動的に黒塗りしています');
+            let out = dataUrl;
+            try {
+                const r = await redactReceipt(dataUrl);
+                out = r.url;
+                if (r.receipt) toast(r.n ? `レシートの個人情報らしき ${r.n} か所を黒塗りしました` : 'レシートを確認しました（黒塗りが必要な箇所は見つかりませんでした）');
+            } catch (e) {
+                console.warn('redaction failed', e);
+                toast('自動の黒塗りができませんでした。店名や住所などが写っていないか確認してください。', 'error');
+            } finally {
+                hideLoading();
+            }
+            setPreviewRaw(key, out);
+        }
+
+        function setPreviewRaw(key, dataUrl) {
+            document.getElementById(`${key}-preview`).src = dataUrl;
+            document.getElementById(`${key}-preview-container`).classList.remove('hidden');
+            document.getElementById(`${key}-placeholder`).classList.add('hidden');
+        }
+
+        function resizeToDataUrl(source, w, h, maxEdge = 1600) {
+            const scale = Math.min(1, maxEdge / Math.max(w, h));
+            const c = document.createElement('canvas');
+            c.width = Math.round(w * scale);
+            c.height = Math.round(h * scale);
+            c.getContext('2d').drawImage(source, 0, 0, c.width, c.height);
+            return c.toDataURL('image/jpeg', 0.85);
+        }
+
+        async function handleImageSelected(event, previewId) {
+            const input = event.target;
+            const file = input.files[0];
+            const key = previewId.replace('-preview', '');
+            if (!file) return;
+            try {
+                let img;
+                if (window.createImageBitmap) {
+                    img = await createImageBitmap(file, { imageOrientation: 'from-image' }).catch(() => createImageBitmap(file));
+                } else {
+                    img = await new Promise((ok, ng) => { const im = new Image(); im.onload = () => ok(im); im.onerror = ng; im.src = URL.createObjectURL(file); });
+                }
+                setPreview(key, resizeToDataUrl(img, img.width, img.height));
+                if (img.close) img.close();
+            } catch (e) {
+                console.error(e);
+                toast('画像を読み込めませんでした。別の写真をお試しください。', 'error');
+            } finally {
+                input.value = '';
+            }
+        }
+
+        let camStream = null, camTarget = null, camFacing = 'environment';
+
+        async function openCamera(key) {
+            camTarget = key;
+            if (!navigator.mediaDevices?.getUserMedia || !window.isSecureContext) return nativeCamera(key);
+            try {
+                await startCamera();
+                document.getElementById('camera-title').innerText = key === 'consult' ? '商品・棚を撮影' : 'レシート・商品を撮影';
+                document.getElementById('camera-modal').classList.remove('hidden');
+            } catch (e) {
+                console.warn('camera failed', e);
+                stopCamera();
+                toast(e.name === 'NotAllowedError' ? 'カメラが許可されていないため、標準カメラを起動します。' : 'カメラを開けないため、標準カメラを起動します。');
+                nativeCamera(key);
+            }
+        }
+
+        function nativeCamera(key) { document.getElementById(`${key}-camera-input`).click(); }
+
+        async function startCamera() {
+            stopCamera();
+            camStream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: { ideal: camFacing }, width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false
+            });
+            const v = document.getElementById('camera-video');
+            v.srcObject = camStream;
+            v.style.transform = camFacing === 'user' ? 'scaleX(-1)' : '';
+            await v.play().catch(() => {});
+            navigator.mediaDevices.enumerateDevices().then(d => {
+                document.getElementById('flip-btn').classList.toggle('invisible', d.filter(x => x.kind === 'videoinput').length < 2);
+            }).catch(() => {});
+        }
+
+        function stopCamera() { camStream?.getTracks().forEach(t => t.stop()); camStream = null; }
+
+        function closeCamera() {
+            stopCamera();
+            document.getElementById('camera-video').srcObject = null;
+            document.getElementById('camera-modal').classList.add('hidden');
+        }
+
+        async function flipCamera() {
+            const prev = camFacing;
+            camFacing = prev === 'environment' ? 'user' : 'environment';
+            try { await startCamera(); }
+            catch (e) {
+                camFacing = prev;
+                toast('カメラを切り替えできませんでした。', 'error');
+                try { await startCamera(); } catch (_) { closeCamera(); }
+            }
+        }
+
+        function takePhoto() {
+            const v = document.getElementById('camera-video');
+            if (!v.videoWidth) return;
+            setPreview(camTarget, resizeToDataUrl(v, v.videoWidth, v.videoHeight));
+            closeCamera();
+        }
+
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeCamera(); });
+        document.addEventListener('visibilitychange', () => { if (document.hidden) closeCamera(); });
+
+        function toast(msg, type) {
+            const el = document.createElement('div');
+            el.className = `px-4 py-2.5 rounded-xl text-xs font-bold shadow-lg text-white pointer-events-auto transition-opacity duration-300 ${type === 'error' ? 'bg-rose-600' : 'bg-slate-800'}`;
+            el.textContent = String(msg).slice(0, 220);
+            const container = document.getElementById('toast-box');
+            if (container) container.appendChild(el);
+            setTimeout(() => { el.style.opacity = 0; setTimeout(() => el.remove(), 300); }, type === 'error' ? 5000 : 3000);
+        }
+
+        function parseAiJson(t) {
+            return JSON.parse(String(t).replace(/^\s*```(?:json)?\s*|\s*```\s*$/g, '').trim());
+        }
+
+        function stopVoice() { if (currentVoice) { currentVoice.pause(); currentVoice = null; } }
+
+        function resetConsultImage() {
+            const input = document.getElementById('consult-image-input');
+            const preview = document.getElementById('consult-preview');
+            const container = document.getElementById('consult-preview-container');
+            const placeholder = document.getElementById('consult-placeholder');
+            if (input) input.value = '';
+            if (preview) preview.src = '';
+            if (container) container.classList.add('hidden');
+            if (placeholder) placeholder.classList.remove('hidden');
+        }
+
+        function resetLogImage() {
+            const input = document.getElementById('log-image-input');
+            const preview = document.getElementById('log-preview');
+            const container = document.getElementById('log-preview-container');
+            const placeholder = document.getElementById('log-placeholder');
+            if (input) input.value = '';
+            if (preview) preview.src = '';
+            if (container) container.classList.add('hidden');
+            if (placeholder) placeholder.classList.remove('hidden');
+        }
+
+        function getBase64FromImage(imgElement) {
+            if (!imgElement || !imgElement.src || !imgElement.src.startsWith('data:image')) return null;
+            return imgElement.src.split(',')[1];
+        }
+
+        async function callGeminiAPI(payload, model = "gemini-3-flash-preview") {
+            const apiKey = appData.settings.apiKey || "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+            
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                const errText = await response.text();
+                throw new Error(`Gemini API Error (${response.status}): ${errText}`);
+            }
+            return await response.json();
+        }
+
+        async function askAdvice() {
+            const imgEl = document.getElementById('consult-preview');
+            const base64Data = getBase64FromImage(imgEl);
+            const price = document.getElementById('consult-price')?.value || 0;
+            const note = document.getElementById('consult-note')?.value || "";
+
+            if (!base64Data && !note) {
+                toast("商品・棚の写真または迷っているメモを入力してください！");
+                return;
+            }
+
+            showLoading("AIお悩み鑑定士が分析中...", "過去データ、栄養バランス、目標のWishlistと照合しています");
+
+            try {
+                const state = getActiveState();
+                const targetWish = state.wishlist.find(w => w.isTarget) || state.wishlist[0];
+                const wishInfo = targetWish ? `【現在の本命目標】: ${targetWish.title} (目標額: ${targetWish.price}円, 現在の達成額: ${state.savedAmount}円)` : "本命目標未設定";
+
+                const logSummary = state.logs.map(l => `- ${l.name} (${l.category}, ${l.price}円)`).join("\n");
+                const modeContext = appData.currentMode === 'personal' ? '個人のお買い物' : '家族の共有お買い物';
+
+                const systemPrompt = `
+あなたは無駄遣いしがちな人のための厳しいが愛のある「節約＆お買い物相談AIアドバイザー」です。
+現在のモード: ${modeContext}
+回答スタイル: ${TONES[appData.settings.tone] || TONES.strict}
+
+ユーザーは今、店舗で商品を買うか猛烈に悩んでいます。
+画像や値段、過去の購入ログ、そして「本当に欲しかった目標(Wishlist)」を元に、購入すべきか「絶対買うな（または買っても良い）」かを判定してください。
+
+特に、過去に類似品を買っていたり、栄養面で偏り・過剰摂取（お菓子やジュース等）になる場合、また「これを我慢すれば〇〇（目標アイテム）が買える！」という点を強力に使って説得してください。
+
+必ず以下のJSON形式で回答してください:
+{
+  "shouldBuy": false,
+  "headline": "短く強烈な説得キャッチコピー",
+  "reasoning": "説得の詳しい理由",
+  "estimatedPrice": 450
+}
+`;
+
+                const userText = `
+【相談商品情報】
+価格: ${price}円
+ユーザーメモ: ${note}
+
+${wishInfo}
+
+【過去の購入・所持ログ】
+${logSummary}
+`;
+
+                const parts = [{ text: userText }];
+                if (base64Data) {
+                    parts.push({
+                        inlineData: {
+                            mimeType: "image/jpeg",
+                            data: base64Data
+                        }
+                    });
+                }
+
+                const payload = {
+                    contents: [{ role: "user", parts: parts }],
+                    generationConfig: {
+                        responseMimeType: "application/json"
+                    },
+                    systemInstruction: { parts: [{ text: systemPrompt }] }
+                };
+
+                const res = await callGeminiAPI(payload);
+                const jsonText = res.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (!jsonText) throw new Error("AIからの応答が得られませんでした。");
+
+                const result = parseAiJson(jsonText);
+                lastAdviceData = { ...result, actualPrice: Number(price) || result.estimatedPrice || 0 };
+
+                displayAdviceResult(lastAdviceData);
+
+            } catch (err) {
+                console.error(err);
+                toast("AI判定中にエラーが発生しました: " + err.message, "error");
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function displayAdviceResult(data) {
+            const card = document.getElementById('advice-result-card');
+            const badge = document.getElementById('advice-status-badge');
+            const headline = document.getElementById('advice-headline');
+            const reasoning = document.getElementById('advice-reasoning');
+
+            if (badge) {
+                if (!data.shouldBuy) {
+                    badge.className = "self-start px-3 py-1 rounded-full font-bold text-xs uppercase tracking-wide flex items-center gap-1.5 bg-rose-50 text-rose-600 border border-rose-200 pulse-danger";
+                    badge.innerHTML = '<i class="fa-solid fa-ban"></i> 購入中止！我慢しましょう！';
+                } else {
+                    badge.className = "self-start px-3 py-1 rounded-full font-bold text-xs uppercase tracking-wide flex items-center gap-1.5 bg-teal-50 text-teal-700 border border-teal-200";
+                    badge.innerHTML = '<i class="fa-solid fa-circle-check"></i> 買いましょう！必要な支出です';
+                }
+            }
+
+            if (headline) headline.innerText = data.headline;
+            if (reasoning) reasoning.innerText = data.reasoning;
+
+            if (card) {
+                card.classList.remove('hidden');
+                card.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function recordConsultDecision(userResisted) {
+            if (!lastAdviceData) return;
+
+            const state = getActiveState();
+            const priceVal = lastAdviceData.actualPrice || 300;
+            (state.decisions = state.decisions || []).push({ date: new Date().toLocaleDateString('sv-SE'), amount: priceVal, resisted: !!userResisted });
+
+            if (userResisted) {
+                state.savedAmount = (state.savedAmount || 0) + priceVal;
+                state.savedCount = (state.savedCount || 0) + 1;
+                saveState();
+                renderAll();
+                toast(`素晴らしい！ ￥${priceVal} の無駄遣いを阻止しました！節約額に加算されます！`);
+            } else {
+                state.failedAmount = (state.failedAmount || 0) + priceVal;
+                state.failedCount = (state.failedCount || 0) + 1;
+                saveState();
+                renderAll();
+                toast(`今回は ￥${priceVal} の無駄遣いを防げませんでした。「防げなかった無駄遣い」に記録されました。`);
+            }
+            const card = document.getElementById('advice-result-card');
+            if (card) card.classList.add('hidden');
+            resetConsultImage();
+            const pInput = document.getElementById('consult-price');
+            const nInput = document.getElementById('consult-note');
+            if (pInput) pInput.value = '';
+            if (nInput) nInput.value = '';
+            lastAdviceData = null;
+            stopVoice();
+        }
+
+        async function processReceiptOrItem() {
+            const imgEl = document.getElementById('log-preview');
+            const base64Data = getBase64FromImage(imgEl);
+
+            if (!base64Data) {
+                toast("解析するレシートまたは商品の写真を撮影・アップロードしてください！");
+                return;
+            }
+
+            showLoading("レシート・商品をAI解析中...", "文字認識・価格・栄養バランス・個数を推定しています");
+
+            try {
+                const systemPrompt = `
+あなたは画像（レシートまたは商品単体）を解析するエキスパートです。
+画像から「商品名」「価格」「個数」「カテゴリ」「栄養や特性（食品の場合）」を推測し、JSONで出力してください。
+
+複数の商品が写っている場合（レシート等）はすべて items 配列に含めてください。商品が1つでも配列にします。isWasteRiskはお菓子・ジュースなど無駄遣いになりやすい物ならtrue。
+出力形式JSON:
+{"items":[{"name":"商品名","price":250,"count":1,"category":"スナック・お菓子 | 飲料・嗜好品 | 生鮮・食品 | 日用品 | その他","nutrition":"高カロリー/高脂質 や ビタミン豊富 など短く","isWasteRisk":true}]}
+`;
+
+                const payload = {
+                    contents: [{
+                        role: "user",
+                        parts: [
+                            { text: "この写真を解析してデータ化してください。" },
+                            { inlineData: { mimeType: "image/jpeg", data: base64Data } }
+                        ]
+                    }],
+                    generationConfig: { responseMimeType: "application/json" },
+                    systemInstruction: { parts: [{ text: systemPrompt }] }
+                };
+
+                const res = await callGeminiAPI(payload);
+                const jsonText = res.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (!jsonText) throw new Error("解析データが得られませんでした。");
+
+                const parsed = parseAiJson(jsonText);
+                const list = (Array.isArray(parsed) ? parsed : (parsed.items || [parsed])).filter(x => x && x.name);
+                if (!list.length) throw new Error("商品を読み取れませんでした。写真を撮り直してください。");
+                const state = getActiveState();
+                const today = new Date().toLocaleDateString('sv-SE');
+                list.forEach((it, i) => state.logs.push({
+                    id: Date.now() + i, name: String(it.name), price: Number(it.price) || 0, count: Number(it.count) || 1,
+                    category: String(it.category || 'その他'), nutrition: String(it.nutrition || ''), isWasteRisk: !!it.isWasteRisk, date: today
+                }));
+                saveState();
+                renderAll();
+                resetLogImage();
+                toast(`${list.length}件を${appData.currentMode === 'personal' ? '個人' : '家族'}ログに追加しました！`);
+
+            } catch(err) {
+                console.error(err);
+                toast("解析エラー: " + err.message, "error");
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function playAdviceVoice() {
+            if (!lastAdviceData || !lastAdviceData.reasoning) {
+                toast("再生する説得テキストがありません。");
+                return;
+            }
+
+            const playBtn = document.getElementById('tts-play-btn');
+            if (playBtn) {
+                playBtn.disabled = true;
+                playBtn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> 生成中...';
+            }
+
+            try {
+                const apiKey = appData.settings.apiKey || "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+
+                const textToSay = `${TTS_STYLE[appData.settings.tone] || TTS_STYLE.strict}: ${lastAdviceData.headline}。 ${lastAdviceData.reasoning}`;
+
+                const payload = {
+                    contents: [{ parts: [{ text: textToSay }] }],
+                    generationConfig: {
+                        responseModalities: ["AUDIO"],
+                        speechConfig: {
+                            voiceConfig: {
+                                prebuiltVoiceConfig: { voiceName: "Kore" }
+                            }
+                        }
+                    }
+                };
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error(`音声合成の呼び出しに失敗しました (${response.status})`);
+
+                const result = await response.json();
+                const part = result?.candidates?.[0]?.content?.parts?.[0];
+                const audioData = part?.inlineData?.data;
+                const mimeType = part?.inlineData?.mimeType;
+
+                if (audioData && mimeType) {
+                    const sampleRateMatch = mimeType.match(/rate=(\d+)/);
+                    const sampleRate = sampleRateMatch ? parseInt(sampleRateMatch[1], 10) : 24000;
+                    
+                    const pcmData = base64ToArrayBuffer(audioData);
+                    const pcm16 = new Int16Array(pcmData);
+                    const wavBlob = pcmToWav(pcm16, sampleRate);
+                    
+                    if (currentConsultAudioBlobUrl) {
+                        URL.revokeObjectURL(currentConsultAudioBlobUrl);
+                    }
+                    currentConsultAudioBlobUrl = URL.createObjectURL(wavBlob);
+                    
+                    stopVoice();
+                    currentVoice = new Audio(currentConsultAudioBlobUrl);
+                    await currentVoice.play();
+                } else {
+                    throw new Error("音声データを受け取れませんでした。");
+                }
+
+            } catch(e) {
+                console.error(e);
+                toast("音声再生エラー: " + e.message, "error");
+            } finally {
+                if (playBtn) {
+                    playBtn.disabled = false;
+                    playBtn.innerHTML = '<i class="fa-solid fa-play text-teal-600"></i> 再生';
+                }
+            }
+        }
+
+        function base64ToArrayBuffer(base64) {
+            const binaryString = window.atob(base64);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
+
+        function pcmToWav(pcm16Array, sampleRate = 24000) {
+            const buffer = new ArrayBuffer(44 + pcm16Array.length * 2);
+            const view = new DataView(buffer);
+
+            writeString(view, 0, 'RIFF');
+            view.setUint32(4, 36 + pcm16Array.length * 2, true);
+            writeString(view, 8, 'WAVE');
+            writeString(view, 12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true);
+            view.setUint16(22, 1, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * 2, true);
+            view.setUint16(32, 2, true);
+            view.setUint16(34, 16, true);
+            writeString(view, 36, 'data');
+            view.setUint32(40, pcm16Array.length * 2, true);
+
+            let offset = 44;
+            for (let i = 0; i < pcm16Array.length; i++, offset += 2) {
+                view.setInt16(offset, pcm16Array[i], true);
+            }
+
+            return new Blob([buffer], { type: 'audio/wav' });
+        }
+
+        function writeString(view, offset, string) {
+            for (let i = 0; i < string.length; i++) {
+                view.setUint8(offset + i, string.charCodeAt(i));
+            }
+        }
+
+        function showLoading(text, subText) {
+            const textEl = document.getElementById('loading-text');
+            const subEl = document.getElementById('loading-sub');
+            const overlay = document.getElementById('loading-overlay');
+            if (textEl) textEl.innerText = text;
+            if (subEl) subEl.innerText = subText || "";
+            if (overlay) overlay.classList.remove('hidden');
+        }
+
+        function hideLoading() {
+            const overlay = document.getElementById('loading-overlay');
+            if (overlay) overlay.classList.add('hidden');
+        }
+
+        function escapeHtml(str) {
+            if (str == null) return '';
+            return String(str).replace(/[&<>"']/g, function(m) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+            });
+        }
+    </script>
+</body>
+</html>
